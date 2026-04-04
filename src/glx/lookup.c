@@ -34,8 +34,8 @@ void *gl4es_glXGetProcAddress(const char *name) {
     _EX(glXSwapBuffers);
     _EX(glXSwapIntervalEXT);
 #endif
-    MAP("glXSwapIntervalMESA", gl4es_glXSwapInterval);
-    MAP("glXSwapIntervalSGI", gl4es_glXSwapInterval);
+    //MAP("glXSwapIntervalMESA", gl4es_glXSwapInterval);
+    //MAP("glXSwapIntervalSGI", gl4es_glXSwapInterval);
 #if !defined(NOX11) || defined(GLX_STUBS)
     _EX(glXUseXFont);
     _EX(glXWaitGL);
