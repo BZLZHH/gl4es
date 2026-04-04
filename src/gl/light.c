@@ -336,10 +336,6 @@ void APIENTRY_GL4ES gl4es_glMaterialfv(GLenum face, GLenum pname, const GLfloat 
             break;
     }
 
-    if(face==GL_BACK && hardext.esversion==1) { // lets ignore GL_BACK in GLES 1.1
-        noerrorShim();
-        return;
-    }
     LOAD_GLES_FPE(glMaterialfv);
     gles_glMaterialfv(GL_FRONT_AND_BACK, pname, params);
     errorGL();
@@ -381,10 +377,6 @@ void APIENTRY_GL4ES gl4es_glMaterialf(GLenum face, GLenum pname, GLfloat param) 
         glstate->material.back.shininess = param;
     }
 
-    if(face==GL_BACK && hardext.esversion==1) { // lets ignore GL_BACK in GLES 1.1
-        noerrorShim();
-        return;
-    }
     FLUSH_BEGINEND;
     LOAD_GLES_FPE(glMaterialf);
     gles_glMaterialf(GL_FRONT_AND_BACK, pname, param);

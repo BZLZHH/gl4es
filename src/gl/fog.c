@@ -53,13 +53,9 @@ void APIENTRY_GL4ES gl4es_glFogfv(GLenum pname, const GLfloat* params) {
             break;
         case GL_FOG_COORD_SRC:
             GOI(coord_src)
-            if(hardext.esversion==1)
-                return; // unsupported on GLES1.1
             break;
         case GL_FOG_DISTANCE_MODE_NV:
             GOI(distance)
-            if(hardext.esversion==1)
-                return; // unsupported on GLES1.1
             break;
         default:
             errorShim(GL_INVALID_ENUM);

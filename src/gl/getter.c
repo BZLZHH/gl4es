@@ -703,21 +703,11 @@ int gl4es_commonGet(GLenum pname, GLfloat *params) {
             break;
         // global hints
         case GL_PERSPECTIVE_CORRECTION_HINT:
-            if(hardext.esversion==1) return 0; // fall back to actual glGet
-            *params=GL_DONT_CARE;
-            break;
         case GL_POINT_SMOOTH_HINT:
-            if(hardext.esversion==1) return 0; // fall back to actual glGet
-            *params=GL_DONT_CARE;
-            break;
         case GL_LINE_SMOOTH_HINT:
-            if(hardext.esversion==1) return 0; // fall back to actual glGet
-            *params=GL_DONT_CARE;
-            break;
         case GL_FOG_HINT:
-            if(hardext.esversion==1) return 0; // fall back to actual glGet
-            *params=GL_DONT_CARE;
-            break;
+            // These hints are not supported in GLES2
+            return 0; // fall back to actual glGet
         case GL_TEXTURE_COMPRESSION_HINT:
             *params=GL_DONT_CARE;
             break;
@@ -726,10 +716,7 @@ int gl4es_commonGet(GLenum pname, GLfloat *params) {
             break;
         //case GL_MAX_VERTEX_ATTRIBS_ARB:   //same value
         case GL_MAX_VERTEX_ATTRIBS:
-            if(hardext.esversion==1)
-                *params = 0;
-            else
-                *params = hardext.maxvattrib;
+            *params = hardext.maxvattrib;
             break;
         case GL_MAX_PROGRAM_MATRICES_ARB:
             *params = MAX_ARB_MATRIX;

@@ -246,11 +246,8 @@ static renderlist_t *arrays_add_renderlist(renderlist_t *a, GLenum mode,
 
 static inline bool should_intercept_render(GLenum mode) {
     // check bounded tex that will be used if one need some transformations
-    if (hardext.esversion==1)   // but only for ES1.1
     for (int aa=0; aa<hardext.maxtex; aa++) {
         if (glstate->enable.texture[aa]) {
-            if ((hardext.esversion==1) && ((glstate->enable.texgen_s[aa] || glstate->enable.texgen_t[aa] || glstate->enable.texgen_r[aa] || glstate->enable.texgen_q[aa])))
-                return true;
             if ((!glstate->vao->vertexattrib[ATT_MULTITEXCOORD0+aa].enabled) && !(mode==GL_POINT && glstate->texture.pscoordreplace[aa]))
                 return true;
             if ((glstate->vao->vertexattrib[ATT_MULTITEXCOORD0+aa].enabled) && (glstate->vao->vertexattrib[ATT_MULTITEXCOORD0+aa].size == 1))
@@ -258,10 +255,6 @@ static inline bool should_intercept_render(GLenum mode) {
         }
     }
     if(glstate->polygon_mode == GL_LINE && mode>=GL_TRIANGLES)
-        return true;
-    if ((hardext.esversion==1) && ((glstate->vao->vertexattrib[ATT_SECONDARY].enabled) && (glstate->vao->vertexattrib[ATT_COLOR].enabled)))
-        return true;
-    if ((hardext.esversion==1) && (glstate->vao->vertexattrib[ATT_COLOR].enabled && (glstate->vao->vertexattrib[ATT_COLOR].size != 4)))
         return true;
     //if (glstate->vao->vertex || glstate->vao->elements)
     //    return false;   // don't try to intercept VAO

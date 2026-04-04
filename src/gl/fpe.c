@@ -678,21 +678,9 @@ void APIENTRY_GL4ES fpe_EnableDisableClientState(GLenum cap, GLboolean val) {
         default:
             return; //???
     }
-    if(hardext.esversion==1) {
-        // actually send that to GLES1.1 hardware!
-        if(glstate->gleshard->vertexattrib[att].enabled!=val) {
-            glstate->gleshard->vertexattrib[att].enabled=val;
-            LOAD_GLES(glEnableClientState);
-            LOAD_GLES(glDisableClientState);
-            if(val)
-                gles_glEnableClientState(cap);
-            else
-                gles_glDisableClientState(cap);
-        }
-    } else {
+    // GLES2 uses vertex attribute system, not client state
 DBG(printf("glstate->vao->vertexattrib[%d].enabled (was %d) = %d (hardware=%d)\n", att, glstate->vao->vertexattrib[att].enabled, val, glstate->gleshard->vertexattrib[att].enabled);)
-        glstate->vao->vertexattrib[att].enabled = val;
-    }
+    glstate->vao->vertexattrib[att].enabled = val;
 }
 
 void APIENTRY_GL4ES fpe_glEnableClientState(GLenum cap) {
@@ -1046,7 +1034,6 @@ int fpe_gettexture(int TMU) {
 void realize_glenv(int ispoint, int first, int count, GLenum type, const void* indices, scratch_t* scratch) {
     // the handling of GL_BGRA size of GL_DOUBLE using 1 scratch in not ideal, and a waste when dealing with Buffers
     // TODO: have the scratch buffer part of the VBO, and tag it dirty when buffer is changed (or always dirty for VBO 0)
-    if(hardext.esversion==1) return;
     LOAD_GLES2(glEnableVertexAttribArray)
     LOAD_GLES2(glDisableVertexAttribArray);
     LOAD_GLES2(glVertexAttribPointer);

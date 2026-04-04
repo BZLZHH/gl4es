@@ -259,9 +259,8 @@ void APIENTRY_GL4ES gl4es_glEnd(void) {
     if (!glstate->list.active) return;
     glstate->list.begin = 0;
     // check if TEXTUREx is activate and no TexCoord (or texgen), in that case, create a dummy one base on glstate->..
-    for (int a=0; a<hardext.maxtex; a++)
-		if ((hardext.esversion==1) && glstate->enable.texture[a] && ((glstate->list.active->tex[a]==0) && !(glstate->enable.texgen_s[a] || glstate->texture.pscoordreplace[a])))
-			rlMultiTexCoord4f(glstate->list.active, GL_TEXTURE0+a, glstate->texcoord[a][0], glstate->texcoord[a][1], glstate->texcoord[a][2], glstate->texcoord[a][3]);
+    // GLES2 uses vertex attributes, not fixed-function texture coordinates
+    // This logic was only for GLES1.1
     rlEnd(glstate->list.active); // end the list now
     // render if we're not in a display list
     int withColor = 0;
@@ -461,7 +460,7 @@ void APIENTRY_GL4ES gl4es_glTexCoord4f(GLfloat s, GLfloat t, GLfloat r, GLfloat 
             gl4es_flush();
         else {
             // test if called between glBegin / glEnd but Texture is not active and not using a program. In that case, ignore the call
-            if(hardext.esversion==1 || glstate->glsl->program || (glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[0])))
+            if(glstate->glsl->program || (glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[0])))
                 rlMultiTexCoord4f(glstate->list.active, GL_TEXTURE0, s, t, r, q);
         }
     }
@@ -478,7 +477,7 @@ void APIENTRY_GL4ES gl4es_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t,
             gl4es_flush();
         else {
             // test if called between glBegin / glEnd but Texture is not active. In that case, ignore the call
-            if(hardext.esversion==1 || (glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[target-GL_TEXTURE0])))
+            if(glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[target-GL_TEXTURE0]))
                 rlMultiTexCoord4f(glstate->list.active, target, s, t, r, q);
         }
     }
@@ -496,7 +495,7 @@ void APIENTRY_GL4ES gl4es_glMultiTexCoord2fv(GLenum target, GLfloat* v) {
             gl4es_flush();
         else {
             // test if called between glBegin / glEnd but Texture is not active. In that case, ignore the call
-            if(hardext.esversion==1 || (glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[target-GL_TEXTURE0])))
+            if(glstate->list.begin && (glstate->list.compiling || glstate->enable.texture[target-GL_TEXTURE0]))
                 rlMultiTexCoord2fv(glstate->list.active, target, v);
         }
     }

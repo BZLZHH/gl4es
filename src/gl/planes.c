@@ -19,15 +19,10 @@ void APIENTRY_GL4ES gl4es_glClipPlanef(GLenum plane, const GLfloat *equation)
         errorShim(GL_INVALID_ENUM);
         return;
     }
-    if(hardext.esversion==1) {
-        LOAD_GLES2(glClipPlanef);
-        errorGL();
-        gles_glClipPlanef(plane, equation);
-    } else {    // TODO: should first compute the clipplane and compare to stored one before sending to hardware
-        int p = plane-GL_CLIP_PLANE0;
-        matrix_vector(getInvMVMat(), equation, glstate->planes[p]); //Tested, seems ok
-        noerrorShim();
-    }
+    // GLES2 clip plane handling
+    int p = plane-GL_CLIP_PLANE0;
+    matrix_vector(getInvMVMat(), equation, glstate->planes[p]); //Tested, seems ok
+    noerrorShim();
 }
 
 AliasExport(void,glClipPlanef,,(GLenum pname, const GLfloat* params));

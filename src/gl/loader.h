@@ -204,11 +204,7 @@ EXPORT extern void *egl;
 
 #define LOAD_GLES_FPE(name) \
     DEFINE_RAW(gles, name); \
-    if(hardext.esversion==1) { \
-        LOAD_RAW(gles, name, proc_address(gles, #name)); \
-    } else { \
-        gles_##name = fpe_##name; \
-    }
+    gles_##name = fpe_##name;
 
 #define LOAD_EGL(name) LOAD_LIB(egl, name)
 
@@ -257,7 +253,7 @@ EXPORT extern void *egl;
     DEFINE_RAW(gles, name); \
     { \
         LOAD_EGL(eglGetProcAddress); \
-        LOAD_RAW_SILENT(gles, name, ((hardext.esversion==1)?((void*)egl_eglGetProcAddress(#name"OES")):((void*)dlsym(gles, #name)))); \
+        LOAD_RAW_SILENT(gles, name, dlsym(gles, #name)); \
     }
 #endif // defined(AMIGAOS4) || defined(NOEGL)
 

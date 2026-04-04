@@ -95,10 +95,7 @@ int tex_setup_needchange(GLuint itarget) {
     gltexture_t *bound = glstate->texture.bound[texunit][itarget];
     
     // check if some changes are needed
-    if ((itarget == ENABLED_TEXTURE_RECTANGLE) 
-        || (hardext.esversion==1 && bound->adjust)
-        || (hardext.esversion==1 && !globals4es.texmat && !glstate->texture_matrix[texunit]->identity)
-        )
+    if (itarget == ENABLED_TEXTURE_RECTANGLE)
         return 1;
     return 0;
 }

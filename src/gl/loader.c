@@ -89,16 +89,7 @@ static const char *gles2_lib[] = {
     NULL
 };
 
-static const char *gles_lib[] = {
-    #if defined(BCMHOST)
-    "libbrcmGLESv1_CM",
-    #endif
-    #if !defined(PYRA)
-    "libGLESv1_CM",
-    #endif
-    "libGLES_CM",
-    NULL
-};
+
 
 static const char *egl_lib[] = {
     #if defined(BCMHOST)
@@ -174,7 +165,7 @@ void load_libs() {
         }
 #endif
     }
-    gles = open_lib((globals4es.es==1)?gles_lib:gles2_lib, gles_override);
+    gles = open_lib(gles2_lib, gles_override);  // Only load GLES2 library (GLES1 backend removed)
 #else
     gles = open_lib(L"LIBGL_GLES", L"libGLESv2.dll");
 #endif

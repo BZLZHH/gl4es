@@ -58,10 +58,7 @@ void APIENTRY_GL4ES gl4es_glTexEnvf(GLenum target, GLenum pname, GLfloat param) 
                     if(t->mode == param)
                         return;
                     if(param==GL_COMBINE4) {
-                        if(hardext.esversion==1) {
-                            errorShim(GL_INVALID_ENUM);
-                            return;
-                        }
+                        // GL_COMBINE4 supported in GLES2
                     } else if (param!=GL_ADD && param!=GL_MODULATE && param!=GL_DECAL && param!=GL_BLEND && param!=GL_REPLACE && param!=GL_COMBINE) {
                         errorShim(GL_INVALID_ENUM);
                         return;

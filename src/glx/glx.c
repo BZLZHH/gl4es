@@ -447,7 +447,7 @@ static void init_eglconfig(Display *display) {
     LOAD_EGL(eglChooseConfig);
     LOAD_EGL(eglGetConfigAttrib);
     EGLint configAttribs[] = {
-        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES_BIT:EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,  // GLES1 backend removed
         EGL_NONE
     };
     int configsFound;
@@ -724,7 +724,7 @@ GLXContext gl4es_glXCreateContext(Display *display,
         EGL_ALPHA_SIZE, (hardext.eglnoalpha)?0:glxfbconfig->alphaBits,
 #endif
         EGL_DEPTH_SIZE, depthBits,
-        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES_BIT:EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,  // GLES1 backend removed
         //EGL_BUFFER_SIZE, depthBits,
         EGL_STENCIL_SIZE, glxfbconfig->stencilBits,
 

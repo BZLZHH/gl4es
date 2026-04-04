@@ -207,11 +207,11 @@ void initialize_gl4es() {
         break;
       default:
         // automatic GL version selection
-        globals4es.gl = (globals4es.es==1)?15:21;  // forcing GL 1.5 for es1.1 and GL 2.1 for es2.0
+        globals4es.gl = 21;  // forcing GL 2.1 for GLES2.0 backend
         break;
     }
 
-    SHUT_LOGD("Using GLES %s backend\n", (globals4es.es==1)?"1.1":"2.0");
+    SHUT_LOGD("Using GLES 2.0 backend\n");
 
     env(LIBGL_NODEPTHTEX, globals4es.nodepthtex, "Disable usage of Depth Textures");
 
@@ -528,27 +528,24 @@ void initialize_gl4es() {
         SHUT_LOGD("Trying to batch subsequent glDrawXXXX of size between %d and %d vertices\n", globals4es.minbatch, globals4es.maxbatch);
     }
 
-    if(hardext.esversion==1) globals4es.usevbo=0;   // VBO on ES1.1 backend will be too messy, so disabling
-    else {
-        globals4es.usevbo = ReturnEnvVarIntDef("LIBGL_USEVBO",1);
+    globals4es.usevbo = ReturnEnvVarIntDef("LIBGL_USEVBO",1);
         switch(globals4es.usevbo) {
-          case 0:
-            SHUT_LOGD("Use of VBO disabled\n");
-            break;
-          case 1:
-            SHUT_LOGD("Trying to use VBO\n");
-            break;
-          case 2:
-            SHUT_LOGD("Trying to use VBO (also with glLockArrays)\n");
-            break;
-          case 3:
-            SHUT_LOGD("Trying to use VBO (special glLockArrays case for idtech3 engine)\n");
-              break;
-          default:
-              globals4es.usevbo=1;
-              break;
-        }
-      }
+      case 0:
+        SHUT_LOGD("Use of VBO disabled\n");
+        break;
+      case 1:
+        SHUT_LOGD("Trying to use VBO\n");
+        break;
+      case 2:
+        SHUT_LOGD("Trying to use VBO (also with glLockArrays)\n");
+        break;
+      case 3:
+        SHUT_LOGD("Trying to use VBO (special glLockArrays case for idtech3 engine)\n");
+        break;
+      default:
+        globals4es.usevbo=1;
+        break;
+    }
 
     globals4es.fbomakecurrent = 0;
     if((hardext.vendor & VEND_ARM) || (globals4es.usefb))
