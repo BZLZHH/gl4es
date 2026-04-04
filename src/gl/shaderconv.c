@@ -20,7 +20,7 @@ typedef struct {
 
 const builtin_attrib_t builtin_attrib[] = {
     {"gl_Vertex", "_gl4es_Vertex", "vec4", "highp", ARB_VERTEX},
-    {"gl_Color", "_gl4es_Color", "vec4", "lowp", ARB_COLOR},
+    {"gl_Color", "_gl4es_Color", "vec4", "highp", ARB_COLOR},
     {"gl_MultiTexCoord0", "_gl4es_MultiTexCoord0", "vec4", "highp", ARB_MULTITEXCOORD0},
     {"gl_MultiTexCoord1", "_gl4es_MultiTexCoord1", "vec4", "highp", ARB_MULTITEXCOORD1},
     {"gl_MultiTexCoord2", "_gl4es_MultiTexCoord2", "vec4", "highp", ARB_MULTITEXCOORD2},
@@ -37,14 +37,14 @@ const builtin_attrib_t builtin_attrib[] = {
     {"gl_MultiTexCoord13", "_gl4es_MultiTexCoord13", "vec4", "highp", ARB_MULTITEXCOORD13},
     {"gl_MultiTexCoord14", "_gl4es_MultiTexCoord14", "vec4", "highp", ARB_MULTITEXCOORD14},
     {"gl_MultiTexCoord15", "_gl4es_MultiTexCoord15", "vec4", "highp", ARB_MULTITEXCOORD15},
-    {"gl_SecondaryColor", "_gl4es_SecondaryColor", "vec4", "lowp", ARB_SECONDARY},
+    {"gl_SecondaryColor", "_gl4es_SecondaryColor", "vec4", "highp", ARB_SECONDARY},
     {"gl_Normal", "_gl4es_Normal", "vec3", "highp", ARB_NORMAL},
     {"gl_FogCoord", "_gl4es_FogCoord", "float", "highp", ARB_FOGCOORD}
 };
 
 const builtin_attrib_t builtin_attrib_compressed[] = {
     {"gl_Vertex", "_gl4es_Vertex", "vec4", "highp", COMP_VERTEX},
-    {"gl_Color", "_gl4es_Color", "vec4", "lowp", COMP_COLOR},
+    {"gl_Color", "_gl4es_Color", "vec4", "highp", COMP_COLOR},
     {"gl_MultiTexCoord0", "_gl4es_MultiTexCoord0", "vec4", "highp", COMP_MULTITEXCOORD0},
     {"gl_MultiTexCoord1", "_gl4es_MultiTexCoord1", "vec4", "highp", COMP_MULTITEXCOORD1},
     {"gl_MultiTexCoord2", "_gl4es_MultiTexCoord2", "vec4", "highp", COMP_MULTITEXCOORD2},
@@ -61,7 +61,7 @@ const builtin_attrib_t builtin_attrib_compressed[] = {
     {"gl_MultiTexCoord13", "_gl4es_MultiTexCoord13", "vec4", "highp", COMP_MULTITEXCOORD13},
     {"gl_MultiTexCoord14", "_gl4es_MultiTexCoord14", "vec4", "highp", COMP_MULTITEXCOORD14},
     {"gl_MultiTexCoord15", "_gl4es_MultiTexCoord15", "vec4", "highp", COMP_MULTITEXCOORD15},
-    {"gl_SecondaryColor", "_gl4es_SecondaryColor", "vec4", "lowp", COMP_SECONDARY},
+    {"gl_SecondaryColor", "_gl4es_SecondaryColor", "vec4", "highp", COMP_SECONDARY},
     {"gl_Normal", "_gl4es_Normal", "vec3", "highp", COMP_NORMAL},
     {"gl_FogCoord", "_gl4es_FogCoord", "float", "highp", COMP_FOGCOORD}
 };
@@ -194,17 +194,17 @@ static const char* gl4es_PointSpriteSource =
 
 static const char* gl4es_FogParametersSource =
 "struct gl_FogParameters {\n"
-"    lowp vec4 color;\n"
-"    mediump float density;\n"
-"    mediump float start;\n"
-"    mediump float end;\n"
-"    mediump float scale;\n"   // Derived:   1.0 / (end - start) 
+"    highp vec4 color;\n"
+"    highp float density;\n"
+"    highp float start;\n"
+"    highp float end;\n"
+"    highp float scale;\n"   // Derived:   1.0 / (end - start)
 "};\n"
 "uniform gl_FogParameters gl_Fog;\n";
 static const char* gl4es_FogParametersSourceHighp =
 "struct gl_FogParameters {\n"
-"    lowp vec4 color;\n"
-"    mediump float density;\n"
+"    highp vec4 color;\n"
+"    highp float density;\n"
 "    highp   float start;\n"
 "    highp   float end;\n"
 "    highp   float scale;\n"   // Derived:   1.0 / (end - start) 
@@ -237,25 +237,25 @@ static const char* gl4es_instanceID =
 "uniform int _gl4es_InstanceID;\n";
 
 static const char* gl4es_frontColorSource =
-"varying lowp vec4 _gl4es_FrontColor;\n";
+"varying highp vec4 _gl4es_FrontColor;\n";
 
 static const char* gl4es_backColorSource =
-"varying lowp vec4 _gl4es_BackColor;\n";
+"varying highp vec4 _gl4es_BackColor;\n";
 
 static const char* gl4es_frontSecondaryColorSource =
-"varying lowp vec4 _gl4es_FrontSecondaryColor;\n";
+"varying highp vec4 _gl4es_FrontSecondaryColor;\n";
 
 static const char* gl4es_backSecondaryColorSource =
-"varying lowp vec4 _gl4es_BackSecondaryColor;\n";
+"varying highp vec4 _gl4es_BackSecondaryColor;\n";
 
 static const char* gl4es_texcoordSource =
-"varying mediump vec4 _gl4es_TexCoord[%d];\n";
+"varying highp vec4 _gl4es_TexCoord[%d];\n";
 
 static const char* gl4es_texcoordSourceAlt =
-"varying mediump vec4 _gl4es_TexCoord_%d;\n";
+"varying highp vec4 _gl4es_TexCoord_%d;\n";
 
 static const char* gl4es_fogcoordSource =
-"varying mediump float _gl4es_FogFragCoord;\n";
+"varying highp float _gl4es_FogFragCoord;\n";
 
 static const char* gl4es_ftransformSource = 
 "\n"
@@ -506,8 +506,8 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
     /* else no location or in / out are supported */
   }
   #endif
-  //sprintf(GLESFullHeader, GLESHeader, (wanthighp && hardext.highp==1 && !isVertex)?GLESUseFragHighp:"", (wanthighp)?"highp":"mediump", (wanthighp)?"highp":"mediump");
-  sprintf(GLESFullHeader, GLESHeader[versionHeader], "", (wanthighp)?"highp":"mediump", (wanthighp)?"highp":"mediump");
+  //sprintf(GLESFullHeader, GLESHeader, (wanthighp && hardext.highp==1 && !isVertex)?GLESUseFragHighp:"", (wanthighp)?"highp":"highp", (wanthighp)?"highp":"highp");
+  sprintf(GLESFullHeader, GLESHeader[versionHeader], "", (wanthighp)?"highp":"highp", (wanthighp)?"highp":"highp");
 
   int tmpsize = strlen(pBuffer)*2+strlen(GLESFullHeader)+100;
   char* Tmp = (char*)calloc(1, tmpsize);
@@ -543,7 +543,7 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
   // check if gl_FragDepth is used
   int fragdepth = (strstr(pBuffer, "gl_FragDepth"))?1:0;
   const char* GLESUseFragDepth = "#extension GL_EXT_frag_depth : enable\n";
-  const char* GLESFakeFragDepth = "mediump float fakeFragDepth = 0.0;\n";
+  const char* GLESFakeFragDepth = "highp float fakeFragDepth = 0.0;\n";
   if (fragdepth) {
     /* If #extension is used, it should be placed before the second line of the header. */
     if(hardext.fragdepth)
@@ -936,9 +936,9 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
                   need->need_mvpmatrix = 1;
               }
               if(builtin_matrix[i].texarray)
-                  sprintf(def, "uniform %s%s %s[%d];\n", (ishighp)?"highp ":"mediump ", builtin_matrix[i].type, builtin_matrix[i].name, ntex);
+                  sprintf(def, "uniform %s%s %s[%d];\n", (ishighp)?"highp ":"highp ", builtin_matrix[i].type, builtin_matrix[i].name, ntex);
               else
-                  sprintf(def, "uniform %s%s %s;\n", (ishighp)?"highp ":"mediump ", builtin_matrix[i].type, builtin_matrix[i].name);
+                  sprintf(def, "uniform %s%s %s;\n", (ishighp)?"highp ":"highp ", builtin_matrix[i].type, builtin_matrix[i].name);
               Tmp = gl4es_inplace_insert(gl4es_getline(Tmp, headline++), def, Tmp, &tmpsize);
           }
       }

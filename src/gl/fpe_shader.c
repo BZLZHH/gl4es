@@ -186,7 +186,7 @@ const char* const* fpe_VertexShader(shaderconv_need_t* need, fpe_state_t *state)
     int cm_back_nullexp = state->cm_back_nullexp;
     int texgens = 0;
     int texmats = 0;
-    const char* fogp = hardext.highp?"highp":"mediump";
+    const char* fogp = hardext.highp?"highp":"highp";
 
     for (int i=0; i<hardext.maxtex; ++i) {
         if(state->texgen[i].texgen_s || state->texgen[i].texgen_t || state->texgen[i].texgen_r || state->texgen[i].texgen_q)
@@ -221,7 +221,7 @@ const char* const* fpe_VertexShader(shaderconv_need_t* need, fpe_state_t *state)
                 sprintf(buff, "uniform highp vec4 _gl4es_ClipPlane_%d;\n", i);
                 ShadAppend(buff);
                 ++headers;
-                sprintf(buff, "varying mediump float clippedvertex_%d;\n", i);
+                sprintf(buff, "varying highp float clippedvertex_%d;\n", i);
                 ShadAppend(buff);
                 ++headers;
             }
@@ -327,7 +327,7 @@ const char* const* fpe_VertexShader(shaderconv_need_t* need, fpe_state_t *state)
     }
     if(fog) {
         #if 0   // vertex fog
-        ShadAppend("varying mediump float FogF;\n");
+        ShadAppend("varying highp float FogF;\n");
         headers++;
         if(fogsource==FPE_FOG_SRC_DEPTH && need_vertex<1)
             need_vertex = 1;
@@ -839,7 +839,7 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
     int texenv_combine = 0;
     int texturing = 0;
     char buff[1024];
-    const char* fogp = hardext.highp?"highp":"mediump";
+    const char* fogp = hardext.highp?"highp":"highp";
 
 
     strcpy(shad, fpeshader_signature);
@@ -882,7 +882,7 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
     }
     if(fog) {
         #if 0   // vertex fog
-        ShadAppend("varying mediump float FogF;\n");
+        ShadAppend("varying highp float FogF;\n");
         headers++;
         #else   // pixel fog
         if(fogsource==FPE_FOG_SRC_COORD) {
@@ -899,7 +899,7 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
         //ShadAppend("varying vec4 clipvertex;\n");
         for (int i=0; i<hardext.maxplanes; i++) {
             if((planes>>i)&1) {
-                sprintf(buff, "varying mediump float clippedvertex_%d;\n", i);
+                sprintf(buff, "varying highp float clippedvertex_%d;\n", i);
                 ShadAppend(buff);
                 headers++;
             }
@@ -1030,7 +1030,7 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
                         break;
                     case FPE_BLEND:
                         // create the Uniform for TexEnv Constant color
-                        sprintf(buff, "uniform lowp vec4 _gl4es_TextureEnvColor_%d;\n", i);
+                        sprintf(buff, "uniform highp vec4 _gl4es_TextureEnvColor_%d;\n", i);
                         shad = gl4es_inplace_insert(gl4es_getline(shad, headers), buff, shad, &shad_cap);
                         headers+=gl4es_countline(buff);
                         needclamp=0;
@@ -1141,7 +1141,7 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
                             }
                             if(constant) {
                                 // yep, create the Uniform
-                                sprintf(buff, "uniform lowp vec4 _gl4es_TextureEnvColor_%d;\n", i);
+                                sprintf(buff, "uniform highp vec4 _gl4es_TextureEnvColor_%d;\n", i);
                                 shad = gl4es_inplace_insert(gl4es_getline(shad, headers), buff, shad, &shad_cap);
                                 headers+=gl4es_countline(buff);                            
                             }
@@ -1454,13 +1454,13 @@ const char* const* fpe_FragmentShader(shaderconv_need_t* need, fpe_state_t *stat
                 }
                 char buff2[100];
                 if(need_vec4)
-                    sprintf(buff2, "lowp vec4 %s;\n", blend);
+                    sprintf(buff2, "highp vec4 %s;\n", blend);
                 else
-                    sprintf(buff2, "lowp float %s;\n", blend);
+                    sprintf(buff2, "highp float %s;\n", blend);
                 ShadAppend(buff2);
                 ShadAppend(buff);
             } else {
-                sprintf(buff, "lowp vec4 %s;\n", blend);
+                sprintf(buff, "highp vec4 %s;\n", blend);
                 ShadAppend(buff);
                 switch(blendrgb) {
                     case FPE_BLEND_ZERO:
@@ -1650,17 +1650,17 @@ if(default_fragment) printf("fpe_CustomVertexShader(%p, %p, %d)\n%s\ncolor=%d\n"
                 sprintf(buff, "uniform highp vec4 _gl4es_ClipPlane_%d;\n", i);
                 ShadAppend(buff);
                 ++headline;
-                sprintf(buff, "varying mediump float clippedvertex_%d;\n", i);
+                sprintf(buff, "varying highp float clippedvertex_%d;\n", i);
                 ShadAppend(buff);
                 ++headline;
             }
         }
     }
     if(color) {
-        sprintf(buff, "attribute lowp vec4 _gl4es_Color;\n");
+        sprintf(buff, "attribute highp vec4 _gl4es_Color;\n");
         ShadAppend(buff);
         ++headline;
-        sprintf(buff, "varying lowp vec4 Color;\n");
+        sprintf(buff, "varying highp vec4 Color;\n");
         ShadAppend(buff);
         ++headline;
     }
@@ -1717,7 +1717,7 @@ const char* const* fpe_CustomFragmentShader(const char* initial, fpe_state_t* st
     if(planes) {
         for (int i=0; i<hardext.maxplanes; i++) {
             if((planes>>i)&1) {
-                sprintf(buff, "varying mediump float clippedvertex_%d;\n", i);
+                sprintf(buff, "varying highp float clippedvertex_%d;\n", i);
                 ShadAppend(buff);
             }
         }
@@ -1728,7 +1728,7 @@ const char* const* fpe_CustomFragmentShader(const char* initial, fpe_state_t* st
      || (state->blendsrcalpha>=FPE_BLEND_CONSTANT_COLOR && state->blendsrcalpha<=FPE_BLEND_ONE_MINUS_CONSTANT_ALPHA)
      || (state->blenddstalpha>=FPE_BLEND_CONSTANT_COLOR && state->blenddstalpha<=FPE_BLEND_ONE_MINUS_CONSTANT_ALPHA)
     )) {
-        sprintf(buff, "uniform mediump vec4 _gl4es_BlendColor;\n");
+        sprintf(buff, "uniform highp vec4 _gl4es_BlendColor;\n");
         ShadAppend(buff);
     }
     int is_fragcolor = (strstr(shad, "gl_FragColor")!=NULL)?1:0;
@@ -1737,7 +1737,7 @@ const char* const* fpe_CustomFragmentShader(const char* initial, fpe_state_t* st
         shad = gl4es_inplace_replace(shad, &shad_cap, "main", "_gl4es_main");
         if(is_fragcolor) {
             int l_main = gl4es_getline_for(shad, gl4es_prev_str(shad, strstr(shad, "_gl4es_main"))) - 1;
-            shad = gl4es_inplace_insert(gl4es_getline(shad, l_main), "lowp vec4 _gl4es_FragColor;\n", shad, &shad_cap);
+            shad = gl4es_inplace_insert(gl4es_getline(shad, l_main), "highp vec4 _gl4es_FragColor;\n", shad, &shad_cap);
             shad = gl4es_inplace_replace(shad, &shad_cap, "gl_FragColor", "_gl4es_FragColor");
         }
     }
@@ -1848,13 +1848,13 @@ const char* const* fpe_CustomFragmentShader(const char* initial, fpe_state_t* st
                     }
                     char buff2[100];
                     if(need_vec4)
-                        sprintf(buff2, "lowp vec4 %s;\n", blend);
+                        sprintf(buff2, "highp vec4 %s;\n", blend);
                     else
-                        sprintf(buff2, "lowp float %s;\n", blend);
+                        sprintf(buff2, "highp float %s;\n", blend);
                     ShadAppend(buff2);
                     ShadAppend(buff);
                 } else {
-                    sprintf(buff, "lowp vec4 %s;\n", blend);
+                    sprintf(buff, "highp vec4 %s;\n", blend);
                     ShadAppend(buff);
                     switch(blendrgb) {
                         case FPE_BLEND_ZERO:
