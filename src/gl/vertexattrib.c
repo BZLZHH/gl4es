@@ -182,15 +182,16 @@ void APIENTRY_GL4ES gl4es_glGetVertexAttribPointerv(GLuint index, GLenum pname, 
     noerrorShim();
 }
 
-void APIENTRY_GL4ES gl4es_glVertexAttribDivisor(GLuint index, GLuint divisor) {
-    FLUSH_BEGINEND;
-    // sanity test
-    if(index<0 || index>=hardext.maxvattrib) {
-        errorShim(GL_INVALID_VALUE);
-        return;
-    }
-    glstate->vao->vertexattrib[index].divisor = divisor;
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glVertexAttribDivisor(GLuint index, GLuint divisor) {
+//     FLUSH_BEGINEND;
+//     // sanity test
+//     if(index<0 || index>=hardext.maxvattrib) {
+//         errorShim(GL_INVALID_VALUE);
+//         return;
+//     }
+//     glstate->vao->vertexattrib[index].divisor = divisor;
+// }
 
 AliasExport(void,glVertexAttribPointer,,(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid * pointer));
 AliasExport(void,glVertexAttribIPointer,,(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer));
@@ -218,5 +219,6 @@ AliasExport(GLvoid,glGetVertexAttribiv,ARB,(GLuint index, GLenum pname, GLint *p
 AliasExport(GLvoid,glGetVertexAttribPointerv,ARB,(GLuint index, GLenum pname, GLvoid **pointer));
 
 // ============== GL_ARB_instanced_arrays =================
-AliasExport(void,glVertexAttribDivisor,,(GLuint index, GLuint divisor));
-AliasExport(void,glVertexAttribDivisor,ARB,(GLuint index, GLuint divisor));
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// AliasExport(void,glVertexAttribDivisor,,(GLuint index, GLuint divisor));
+// AliasExport(void,glVertexAttribDivisor,ARB,(GLuint index, GLuint divisor));

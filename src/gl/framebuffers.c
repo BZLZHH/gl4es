@@ -807,13 +807,14 @@ void APIENTRY_GL4ES gl4es_glFramebufferTexture2D(GLenum target, GLenum attachmen
     ReadDraw_Pop(target);
 }
 
-void APIENTRY_GL4ES gl4es_glFramebufferTexture1D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level) {
-    gl4es_glFramebufferTexture2D(target, attachment, textarget, texture, level);
-}
-void APIENTRY_GL4ES gl4es_glFramebufferTexture3D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer) {
-    (void)layer;
-    gl4es_glFramebufferTexture2D(target, attachment, textarget, texture, level);
-}
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glFramebufferTexture1D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level) {
+//     gl4es_glFramebufferTexture2D(target, attachment, textarget, texture, level);
+// }
+// void APIENTRY_GL4ES gl4es_glFramebufferTexture3D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer) {
+//     (void)layer;
+//     gl4es_glFramebufferTexture2D(target, attachment, textarget, texture, level);
+// }
 
 void APIENTRY_GL4ES gl4es_glGenRenderbuffers(GLsizei n, GLuint *renderbuffers) {
     DBG(printf("glGenRenderbuffers(%i, %p)\n", n, renderbuffers);)
@@ -1054,9 +1055,10 @@ void APIENTRY_GL4ES gl4es_glRenderbufferStorage(GLenum target, GLenum internalfo
     DBG(CheckGLError(1);)
 }
 
-void APIENTRY_GL4ES gl4es_glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {    //STUB
-    gl4es_glRenderbufferStorage(target, internalformat, width, height);
-}
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {    //STUB
+//     gl4es_glRenderbufferStorage(target, internalformat, width, height);
+// }
 
 void APIENTRY_GL4ES gl4es_glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
     DBG(printf("glBindRenderbuffer(%s, %u), binded Fbo=%u\n", PrintEnum(target), renderbuffer, glstate->fbo.current_fb->id);)
@@ -1383,9 +1385,10 @@ void deleteMainFBO(void *state) {
     // all done...
 }
 
-void APIENTRY_GL4ES gl4es_glFramebufferTextureLayer(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
-    gl4es_glFramebufferTexture2D(target, attachment, GL_TEXTURE_2D, texture,    level); // Force Texture2D, ignore layer (should track?)...
-}
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glFramebufferTextureLayer(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
+//     gl4es_glFramebufferTexture2D(target, attachment, GL_TEXTURE_2D, texture,    level); // Force Texture2D, ignore layer (should track?)...
+// }
 
 #ifndef NOX11
 void gl4es_SwapBuffers_currentContext();    // defined in glx/glx.c
@@ -1526,200 +1529,210 @@ void APIENTRY_GL4ES gl4es_glDrawBuffers(GLsizei n, const GLenum *bufs) {
     memcpy(glstate->fbo.fbo_draw->drawbuff, bufs, n*sizeof(GLenum));
     noerrorShim();
 }
-void APIENTRY_GL4ES gl4es_glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n, const GLenum *bufs) {
-    if(n<0 || n>hardext.maxdrawbuffers) {
-        errorShim(GL_INVALID_VALUE);
-        return;
-    }
-    glframebuffer_t* fb = find_framebuffer(framebuffer);
-    if(hardext.drawbuffers) {
-        GLuint oldf = glstate->fbo.fbo_draw->id;
-        gl4es_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->id);
-        LOAD_GLES_EXT(glDrawBuffers);
-        gles_glDrawBuffers(n, bufs);
-        errorGL();
-        gl4es_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldf);
-    }
-    fb->n_draw = n;
-    memcpy(fb->drawbuff, bufs, n*sizeof(GLenum));
-    noerrorShim();
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n, const GLenum *bufs) {
+//     if(n<0 || n>hardext.maxdrawbuffers) {
+//         errorShim(GL_INVALID_VALUE);
+//         return;
+//     }
+//     glframebuffer_t* fb = find_framebuffer(framebuffer);
+//     if(hardext.drawbuffers) {
+//         GLuint oldf = glstate->fbo.fbo_draw->id;
+//         gl4es_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->id);
+//         LOAD_GLES_EXT(glDrawBuffers);
+//         gles_glDrawBuffers(n, bufs);
+//         errorGL();
+//         gl4es_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldf);
+//     }
+//     fb->n_draw = n;
+//     memcpy(fb->drawbuff, bufs, n*sizeof(GLenum));
+//     noerrorShim();
+// }
 
 
-void APIENTRY_GL4ES gl4es_glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint * value) {
-    noerrorShim();
-    GLenum attch;
-    switch(buffer) {
-        case GL_COLOR:
-            if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
-                return; // GL_NONE...
-            attch = glstate->fbo.fbo_draw->drawbuff[buffer];
-            if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
-                errorShim(GL_INVALID_VALUE);
-                return;
-            } else {
-                GLfloat oldclear[4];
-                LOAD_GLES_EXT(glDrawBuffers);
-                // select the buffer...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
-                gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
-                // how to convert the value? Most FB will be 8bits / component for now...
-                gl4es_glClearColor(value[0]/127.0f, value[1]/127.0f, value[2]/127.0f, value[3]/127.0f);
-                gl4es_glClear(GL_COLOR_BUFFER_BIT);
-                gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
-                // put back the draw buffers...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
-                return;
-            }
-            break;
-        case GL_STENCIL:
-            if(drawbuffer==0) {
-                GLint old;
-                gl4es_glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &old);
-                gl4es_glClearStencil(*value);
-                gl4es_glClear(GL_STENCIL_BUFFER_BIT);
-                gl4es_glClearStencil(old);
-                return;
-            } else {
-                errorShim(GL_INVALID_ENUM);
-                return;
-            }
-        default:
-            errorShim(GL_INVALID_ENUM);
-    }
-    return;
-}
-void APIENTRY_GL4ES gl4es_glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint * value) {
-    noerrorShim();
-    GLenum attch;
-    switch(buffer) {
-        case GL_COLOR:
-            if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
-                return; // GL_NONE...
-            attch = glstate->fbo.fbo_draw->drawbuff[buffer];
-            if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
-                errorShim(GL_INVALID_VALUE);
-                return;
-            } else {
-                GLfloat oldclear[4];
-                LOAD_GLES_EXT(glDrawBuffers);
-                // select the buffer...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
-                gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
-                // how to convert the value? Most FB will be 8bits / component for now...
-                gl4es_glClearColor(value[0]/255.0f, value[1]/255.0f, value[2]/255.0f, value[3]/255.0f);
-                gl4es_glClear(GL_COLOR_BUFFER_BIT);
-                gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
-                // put back the draw buffers...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
-                return;
-            }
-            break;
-        default:
-            errorShim(GL_INVALID_ENUM);
-    }
-    return;
-}
-void APIENTRY_GL4ES gl4es_glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat * value) {
-    noerrorShim();
-    GLenum attch;
-    switch(buffer) {
-        case GL_COLOR:
-            if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
-                return; // GL_NONE...
-            attch = glstate->fbo.fbo_draw->drawbuff[buffer];
-            if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
-                errorShim(GL_INVALID_VALUE);
-                return;
-            } else {
-                GLfloat oldclear[4];
-                LOAD_GLES_EXT(glDrawBuffers);
-                // select the buffer...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
-                gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
-                // how to convert the value? Most FB will be 8bits / component for now...
-                gl4es_glClearColor(value[0], value[1], value[2], value[3]);
-                gl4es_glClear(GL_COLOR_BUFFER_BIT);
-                gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
-                // put back the draw buffers...
-                if(hardext.drawbuffers)
-                    gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
-                return;
-            }
-            break;
-        case GL_DEPTH:
-            if(drawbuffer==0) {
-                GLint old;
-                gl4es_glGetIntegerv(GL_DEPTH_CLEAR_VALUE, &old);
-                gl4es_glClearDepthf(*value);
-                gl4es_glClear(GL_DEPTH_BUFFER_BIT);
-                gl4es_glClearDepthf(old);
-                return;
-            } else {
-                errorShim(GL_INVALID_ENUM);
-                return;
-            }
-        default:
-            errorShim(GL_INVALID_ENUM);
-    }
-    return;
-}
-void APIENTRY_GL4ES gl4es_glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
-    if(buffer!=GL_DEPTH_STENCIL || drawbuffer!=0) {
-        errorShim(GL_INVALID_ENUM);
-        return;
-    }
-    GLint olds, oldd;
-    gl4es_glGetIntegerv(GL_DEPTH_CLEAR_VALUE, &oldd);
-    gl4es_glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &olds);
-    gl4es_glClearDepthf(depth);
-    gl4es_glClearStencil(stencil);
-    gl4es_glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    gl4es_glClearDepthf(oldd);
-    gl4es_glClearStencil(olds);
-}
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint * value) {
+//     noerrorShim();
+//     GLenum attch;
+//     switch(buffer) {
+//         case GL_COLOR:
+//             if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
+//                 return; // GL_NONE...
+//             attch = glstate->fbo.fbo_draw->drawbuff[buffer];
+//             if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
+//                 errorShim(GL_INVALID_VALUE);
+//                 return;
+//             } else {
+//                 GLfloat oldclear[4];
+//                 LOAD_GLES_EXT(glDrawBuffers);
+//                 // select the buffer...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
+//                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
+//                 // how to convert the value? Most FB will be 8bits / component for now...
+//                 gl4es_glClearColor(value[0]/127.0f, value[1]/127.0f, value[2]/127.0f, value[3]/127.0f);
+//                 gl4es_glClear(GL_COLOR_BUFFER_BIT);
+//                 gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
+//                 // put back the draw buffers...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
+//                 return;
+//             }
+//             break;
+//         case GL_STENCIL:
+//             if(drawbuffer==0) {
+//                 GLint old;
+//                 gl4es_glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &old);
+//                 gl4es_glClearStencil(*value);
+//                 gl4es_glClear(GL_STENCIL_BUFFER_BIT);
+//                 gl4es_glClearStencil(old);
+//                 return;
+//             } else {
+//                 errorShim(GL_INVALID_ENUM);
+//                 return;
+//             }
+//         default:
+//             errorShim(GL_INVALID_ENUM);
+//     }
+//     return;
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint * value) {
+//     noerrorShim();
+//     GLenum attch;
+//     switch(buffer) {
+//         case GL_COLOR:
+//             if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
+//                 return; // GL_NONE...
+//             attch = glstate->fbo.fbo_draw->drawbuff[buffer];
+//             if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
+//                 errorShim(GL_INVALID_VALUE);
+//                 return;
+//             } else {
+//                 GLfloat oldclear[4];
+//                 LOAD_GLES_EXT(glDrawBuffers);
+//                 // select the buffer...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
+//                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
+//                 // how to convert the value? Most FB will be 8bits / component for now...
+//                 gl4es_glClearColor(value[0]/255.0f, value[1]/255.0f, value[2]/255.0f, value[3]/255.0f);
+//                 gl4es_glClear(GL_COLOR_BUFFER_BIT);
+//                 gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
+//                 // put back the draw buffers...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
+//                 return;
+//             }
+//             break;
+//         default:
+//             errorShim(GL_INVALID_ENUM);
+//     }
+//     return;
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat * value) {
+//     noerrorShim();
+//     GLenum attch;
+//     switch(buffer) {
+//         case GL_COLOR:
+//             if(drawbuffer>glstate->fbo.fbo_draw->n_draw)
+//                 return; // GL_NONE...
+//             attch = glstate->fbo.fbo_draw->drawbuff[buffer];
+//             if(!(attch>=GL_COLOR_ATTACHMENT0 && attch<GL_COLOR_ATTACHMENT0+hardext.maxdrawbuffers)) {
+//                 errorShim(GL_INVALID_VALUE);
+//                 return;
+//             } else {
+//                 GLfloat oldclear[4];
+//                 LOAD_GLES_EXT(glDrawBuffers);
+//                 // select the buffer...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(1, (const GLenum *) &drawbuffer);
+//                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
+//                 // how to convert the value? Most FB will be 8bits / component for now...
+//                 gl4es_glClearColor(value[0], value[1], value[2], value[3]);
+//                 gl4es_glClear(GL_COLOR_BUFFER_BIT);
+//                 gl4es_glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
+//                 // put back the draw buffers...
+//                 if(hardext.drawbuffers)
+//                     gles_glDrawBuffers(glstate->fbo.fbo_draw->n_draw, glstate->fbo.fbo_draw->drawbuff);
+//                 return;
+//             }
+//             break;
+//         case GL_DEPTH:
+//             if(drawbuffer==0) {
+//                 GLint old;
+//                 gl4es_glGetIntegerv(GL_DEPTH_CLEAR_VALUE, &old);
+//                 gl4es_glClearDepthf(*value);
+//                 gl4es_glClear(GL_DEPTH_BUFFER_BIT);
+//                 gl4es_glClearDepthf(old);
+//                 return;
+//             } else {
+//                 errorShim(GL_INVALID_ENUM);
+//                 return;
+//             }
+//         default:
+//             errorShim(GL_INVALID_ENUM);
+//     }
+//     return;
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
+//     if(buffer!=GL_DEPTH_STENCIL || drawbuffer!=0) {
+//         errorShim(GL_INVALID_ENUM);
+//         return;
+//     }
+//     GLint olds, oldd;
+//     gl4es_glGetIntegerv(GL_DEPTH_CLEAR_VALUE, &oldd);
+//     gl4es_glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &olds);
+//     gl4es_glClearDepthf(depth);
+//     gl4es_glClearStencil(stencil);
+//     gl4es_glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//     gl4es_glClearDepthf(oldd);
+//     gl4es_glClearStencil(olds);
+// }
 
-void APIENTRY_GL4ES gl4es_glClearNamedFramebufferiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value) {
-    GLuint oldf = glstate->fbo.fbo_draw->id;
-    GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
-    gl4es_glBindFramebuffer(target, framebuffer);
-    gl4es_glClearBufferiv(buffer, drawbuffer, value);
-    gl4es_glBindFramebuffer(target, oldf);
-}
-void APIENTRY_GL4ES gl4es_glClearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value) {
-    GLuint oldf = glstate->fbo.fbo_draw->id;
-    GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
-    gl4es_glBindFramebuffer(target, framebuffer);
-    gl4es_glClearBufferuiv(buffer, drawbuffer, value);
-    gl4es_glBindFramebuffer(target, oldf);
-}
-void APIENTRY_GL4ES gl4es_glClearNamedFramebufferfv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value) {
-    GLuint oldf = glstate->fbo.fbo_draw->id;
-    GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
-    gl4es_glBindFramebuffer(target, framebuffer);
-    gl4es_glClearBufferfv(buffer, drawbuffer, value);
-    gl4es_glBindFramebuffer(target, oldf);
-}
-void APIENTRY_GL4ES gl4es_glClearNamedFramebufferfi(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
-    GLuint oldf = glstate->fbo.fbo_draw->id;
-    GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
-    gl4es_glBindFramebuffer(target, framebuffer);
-    gl4es_glClearBufferfi(buffer, drawbuffer, depth, stencil);
-    gl4es_glBindFramebuffer(target, oldf);
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearNamedFramebufferiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value) {
+//     GLuint oldf = glstate->fbo.fbo_draw->id;
+//     GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
+//     gl4es_glBindFramebuffer(target, framebuffer);
+//     gl4es_glClearBufferiv(buffer, drawbuffer, value);
+//     gl4es_glBindFramebuffer(target, oldf);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value) {
+//     GLuint oldf = glstate->fbo.fbo_draw->id;
+//     GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
+//     gl4es_glBindFramebuffer(target, framebuffer);
+//     gl4es_glClearBufferuiv(buffer, drawbuffer, value);
+//     gl4es_glBindFramebuffer(target, oldf);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearNamedFramebufferfv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value) {
+//     GLuint oldf = glstate->fbo.fbo_draw->id;
+//     GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
+//     gl4es_glBindFramebuffer(target, framebuffer);
+//     gl4es_glClearBufferfv(buffer, drawbuffer, value);
+//     gl4es_glBindFramebuffer(target, oldf);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glClearNamedFramebufferfi(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) {
+//     GLuint oldf = glstate->fbo.fbo_draw->id;
+//     GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
+//     gl4es_glBindFramebuffer(target, framebuffer);
+//     gl4es_glClearBufferfi(buffer, drawbuffer, depth, stencil);
+//     gl4es_glBindFramebuffer(target, oldf);
+// }
 
-void APIENTRY_GL4ES gl4es_glColorMaskIndexed(GLuint framebuffer, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
-    GLuint oldf = glstate->fbo.fbo_draw->id;
-    GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
-    gl4es_glBindFramebuffer(target, framebuffer);
-    gl4es_glColorMask(red, green, blue, alpha);
-    gl4es_glBindFramebuffer(target, oldf);
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glColorMaskIndexed(GLuint framebuffer, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
+//     GLuint oldf = glstate->fbo.fbo_draw->id;
+//     GLenum target = (glstate->fbo.fbo_draw==glstate->fbo.fbo_read)?GL_FRAMEBUFFER:GL_DRAW_FRAMEBUFFER;
+//     gl4es_glBindFramebuffer(target, framebuffer);
+//     gl4es_glColorMask(red, green, blue, alpha);
+//     gl4es_glBindFramebuffer(target, oldf);
+// }
 
 void gl4es_saveCurrentFBO()
 {
@@ -1754,9 +1767,11 @@ AliasExport(void,glDeleteFramebuffers,,(GLsizei n, GLuint *framebuffers));
 AliasExport(GLboolean,glIsFramebuffer,,(GLuint framebuffer));
 AliasExport(GLenum,glCheckFramebufferStatus,,(GLenum target));
 AliasExport(void,glBindFramebuffer,,(GLenum target, GLuint framebuffer));
-AliasExport(void,glFramebufferTexture1D,,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTexture1D,,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
 AliasExport(void,glFramebufferTexture2D,,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
-AliasExport(void,glFramebufferTexture3D,,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTexture3D,,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer));
 AliasExport(void,glGenRenderbuffers,,(GLsizei n, GLuint *renderbuffers));
 AliasExport(void,glFramebufferRenderbuffer,,(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer));
 AliasExport(void,glDeleteRenderbuffers,,(GLsizei n, GLuint *renderbuffers));
@@ -1766,8 +1781,10 @@ AliasExport(GLboolean,glIsRenderbuffer,,(GLuint renderbuffer));
 AliasExport(void,glGenerateMipmap,,(GLenum target));
 AliasExport(void,glGetFramebufferAttachmentParameteriv,,(GLenum target, GLenum attachment, GLenum pname, GLint *params));
 AliasExport(void,glGetRenderbufferParameteriv,,(GLenum target, GLenum pname, GLint * params));
-AliasExport(void,glFramebufferTextureLayer,,(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
-AliasExport(void,glBlitFramebuffer,,(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTextureLayer,,(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glBlitFramebuffer,,(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter));
 
 // EXT direct wrapper
 AliasExport(void,glGenFramebuffers,EXT,(GLsizei n, GLuint *ids));
@@ -1775,9 +1792,11 @@ AliasExport(void,glDeleteFramebuffers,EXT,(GLsizei n, GLuint *framebuffers));
 AliasExport(GLboolean,glIsFramebuffer,EXT,(GLuint framebuffer));
 AliasExport(GLenum,glCheckFramebufferStatus,EXT,(GLenum target));
 AliasExport(void,glBindFramebuffer,EXT,(GLenum target, GLuint framebuffer));
-AliasExport(void,glFramebufferTexture1D,EXT,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTexture1D,EXT,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
 AliasExport(void,glFramebufferTexture2D,EXT,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level));
-AliasExport(void,glFramebufferTexture3D,EXT,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTexture3D,EXT,(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,    GLint level, GLint layer));
 AliasExport(void,glGenRenderbuffers,EXT,(GLsizei n, GLuint *renderbuffers));
 AliasExport(void,glFramebufferRenderbuffer,EXT,(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer));
 AliasExport(void,glDeleteRenderbuffers,EXT,(GLsizei n, GLuint *renderbuffers));
@@ -1787,30 +1806,47 @@ AliasExport(GLboolean,glIsRenderbuffer,EXT,(GLuint renderbuffer));
 AliasExport(void,glGenerateMipmap,EXT,(GLenum target));
 AliasExport(void,glGetFramebufferAttachmentParameteriv,EXT,(GLenum target, GLenum attachment, GLenum pname, GLint *params));
 AliasExport(void,glGetRenderbufferParameteriv,EXT,(GLenum target, GLenum pname, GLint * params));
-AliasExport(void,glFramebufferTextureLayer,EXT,(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
-AliasExport(void,glBlitFramebuffer,EXT,(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glFramebufferTextureLayer,EXT,(    GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glBlitFramebuffer,EXT,(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter));
 
 // Multisample stub
-AliasExport(void,glRenderbufferStorageMultisample,,(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glRenderbufferStorageMultisample,,(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height));
 
 // DrawBuffers
 AliasExport(void,glDrawBuffers,,(GLsizei n, const GLenum *bufs));
 AliasExport(void,glDrawBuffers,ARB,(GLsizei n, const GLenum *bufs));
-AliasExport(void,glNamedFramebufferDrawBuffers,,(GLuint framebuffer, GLsizei n, const GLenum *bufs));
-AliasExport(void,glNamedFramebufferDrawBuffers,EXT,(GLuint framebuffer, GLsizei n, const GLenum *bufs));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glNamedFramebufferDrawBuffers,,(GLuint framebuffer, GLsizei n, const GLenum *bufs));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glNamedFramebufferDrawBuffers,EXT,(GLuint framebuffer, GLsizei n, const GLenum *bufs));
 
 // ClearBuffer...
-AliasExport(void,glClearBufferiv,,(GLenum buffer, GLint drawbuffer, const GLint * value));
-AliasExport(void,glClearBufferuiv,,(GLenum buffer, GLint drawbuffer, const GLuint * value));
-AliasExport(void,glClearBufferfv,,(GLenum buffer, GLint drawbuffer, const GLfloat * value));
-AliasExport(void,glClearBufferfi,,(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearBufferiv,,(GLenum buffer, GLint drawbuffer, const GLint * value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearBufferuiv,,(GLenum buffer, GLint drawbuffer, const GLuint * value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearBufferfv,,(GLenum buffer, GLint drawbuffer, const GLfloat * value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearBufferfi,,(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));
 
-AliasExport(void,glClearNamedFramebufferiv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value));
-AliasExport(void,glClearNamedFramebufferuiv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value));
-AliasExport(void,glClearNamedFramebufferfv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value));
-AliasExport(void,glClearNamedFramebufferfi,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferiv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferuiv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferfv,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferfi,,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));
 
-AliasExport(void,glClearNamedFramebufferiv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value));
-AliasExport(void,glClearNamedFramebufferuiv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value));
-AliasExport(void,glClearNamedFramebufferfv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value));
-AliasExport(void,glClearNamedFramebufferfi,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferiv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferuiv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferfv,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// AliasExport(void,glClearNamedFramebufferfi,EXT,(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil));

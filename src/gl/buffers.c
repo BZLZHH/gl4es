@@ -615,60 +615,62 @@ void APIENTRY_GL4ES gl4es_glGetNamedBufferPointerv(GLuint buffer, GLenum pname, 
 	}
 }
 
-void* APIENTRY_GL4ES gl4es_glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
-{
-    DBG(printf("glMapBufferRange(%s, %p, %zd, 0x%x)\n", PrintEnum(target), (void*)offset, length, access);)
-	if (!buffer_target(target)) {
-		errorShim(GL_INVALID_ENUM);
-		return NULL;
-	}
-
-	glbuffer_t *buff = getbuffer_buffer(target);
-	if (buff==NULL) {
-        errorShim(GL_INVALID_VALUE);
-		return NULL;		// Should generate an error!
-    }
-    if(buff->mapped) {
-        errorShim(GL_INVALID_OPERATION);
-        return NULL;
-    }
-	buff->access = access;
-	buff->mapped = 1;
-    buff->ranged = 1;
-    buff->offset = offset;
-    buff->length = length;
-	noerrorShim();
-    uintptr_t ret = (uintptr_t)buff->data;
-    ret += offset;
-	return (void*)ret;
-}
-void APIENTRY_GL4ES gl4es_glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
-{
-    DBG(printf("glFlushMappedBufferRange(%s, %p, %zd)\n", PrintEnum(target), (void*)offset, length);)
-	if (!buffer_target(target)) {
-		errorShim(GL_INVALID_ENUM);
-		return;
-	}
-
-    if(target==GL_ARRAY_BUFFER)
-        VaoSharedClear(glstate->vao);
-
-    glbuffer_t *buff = getbuffer_buffer(target);
-    if(!buff) {
-        errorShim(GL_INVALID_VALUE);
-        return;
-    }
-    if(!buff->mapped || !buff->ranged || !(buff->access&GL_MAP_FLUSH_EXPLICIT_BIT_EXT)) {
-        errorShim(GL_INVALID_OPERATION);
-        return;
-    }
-
-    if(buff->real_buffer && (buff->type==GL_ARRAY_BUFFER || buff->type==GL_ELEMENT_ARRAY_BUFFER) && (buff->access&GL_MAP_WRITE_BIT_EXT)) {
-        LOAD_GLES(glBufferSubData);
-        bindBuffer(buff->type, buff->real_buffer);
-        gles_glBufferSubData(buff->type, buff->offset+offset, length, (void*)((uintptr_t)buff->data+buff->offset+offset));
-    }
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void* APIENTRY_GL4ES gl4es_glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+// {
+//     DBG(printf("glMapBufferRange(%s, %p, %zd, 0x%x)\n", PrintEnum(target), (void*)offset, length, access);)
+// 	if (!buffer_target(target)) {
+// 		errorShim(GL_INVALID_ENUM);
+// 		return NULL;
+// 	}
+// 
+// 	glbuffer_t *buff = getbuffer_buffer(target);
+// 	if (buff==NULL) {
+//         errorShim(GL_INVALID_VALUE);
+// 		return NULL;		// Should generate an error!
+//     }
+//     if(buff->mapped) {
+//         errorShim(GL_INVALID_OPERATION);
+//         return NULL;
+//     }
+// 	buff->access = access;
+// 	buff->mapped = 1;
+//     buff->ranged = 1;
+//     buff->offset = offset;
+//     buff->length = length;
+// 	noerrorShim();
+//     uintptr_t ret = (uintptr_t)buff->data;
+//     ret += offset;
+// 	return (void*)ret;
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
+// {
+//     DBG(printf("glFlushMappedBufferRange(%s, %p, %zd)\n", PrintEnum(target), (void*)offset, length);)
+// 	if (!buffer_target(target)) {
+// 		errorShim(GL_INVALID_ENUM);
+// 		return;
+// 	}
+// 
+//     if(target==GL_ARRAY_BUFFER)
+//         VaoSharedClear(glstate->vao);
+// 
+//     glbuffer_t *buff = getbuffer_buffer(target);
+//     if(!buff) {
+//         errorShim(GL_INVALID_VALUE);
+//         return;
+//     }
+//     if(!buff->mapped || !buff->ranged || !(buff->access&GL_MAP_FLUSH_EXPLICIT_BIT_EXT)) {
+//         errorShim(GL_INVALID_OPERATION);
+//         return;
+//     }
+// 
+//     if(buff->real_buffer && (buff->type==GL_ARRAY_BUFFER || buff->type==GL_ELEMENT_ARRAY_BUFFER) && (buff->access&GL_MAP_WRITE_BIT_EXT)) {
+//         LOAD_GLES(glBufferSubData);
+//         bindBuffer(buff->type, buff->real_buffer);
+//         gles_glBufferSubData(buff->type, buff->offset+offset, length, (void*)((uintptr_t)buff->data+buff->offset+offset));
+//     }
+// }
 
 void APIENTRY_GL4ES gl4es_glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
 {
@@ -777,8 +779,9 @@ AliasExport(GLboolean,glUnmapBuffer,,(GLenum target));
 AliasExport(void,glGetBufferSubData,,(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid * data));
 AliasExport(void,glGetBufferPointerv,,(GLenum target, GLenum pname, GLvoid ** params));
 
-AliasExport(void*,glMapBufferRange,,(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access));
-AliasExport(void,glFlushMappedBufferRange,,(GLenum target, GLintptr offset, GLsizeiptr length));
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// AliasExport(void*,glMapBufferRange,,(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access));
+// AliasExport(void,glFlushMappedBufferRange,,(GLenum target, GLintptr offset, GLsizeiptr length));
 
 AliasExport(void,glCopyBufferSubData,,(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size));
 //ARB wrapper
@@ -817,93 +820,97 @@ AliasExport(void,glGetNamedBufferPointerv,EXT,(GLuint buffer, GLenum pname, GLvo
 // VAO ****************
 static GLuint lastvao = 1;
 
-void APIENTRY_GL4ES gl4es_glGenVertexArrays(GLsizei n, GLuint *arrays) {
-    DBG(printf("glGenVertexArrays(%i, %p)\n", n, arrays);)
-	noerrorShim();
-    if (n<1) {
-		errorShim(GL_INVALID_VALUE);
-        return;
-    }
-    for (int i=0; i<n; i++) {   // TODO: create VAO here and check unicity
-        arrays[i] = lastvao++;
-    }
-}
-void APIENTRY_GL4ES gl4es_glBindVertexArray(GLuint array) {
-    DBG(printf("glBindVertexArray(%u)\n", array);)
-    FLUSH_BEGINEND;
-
-   	khint_t k;
-   	int ret;
-	khash_t(glvao) *list = glstate->vaos;
-    // if array = 0 => unbind buffer!
-    if (array == 0) {
-        // unbind buffer
-        glstate->vao = glstate->defaultvao;
-    } else {
-        // search for an existing buffer
-        k = kh_get(glvao, list, array);
-        glvao_t *glvao = NULL;
-        if (k == kh_end(list)){
-            k = kh_put(glvao, list, array, &ret);
-            glvao = kh_value(list, k) = malloc(sizeof(glvao_t));
-            // new vao is binded to nothing
-            VaoInit(glvao);
-            // Copy current status to new VAO
-            glvao->vertex = glstate->vao->vertex;
-            glvao->elements = glstate->vao->elements;
-            glvao->pack = glstate->vao->pack;
-            glvao->unpack = glstate->vao->unpack;
-            glvao->maxtex = glstate->vao->maxtex;
-
-            // just put is number
-            glvao->array = array;
-        } else {
-            glvao = kh_value(list, k);
-        }
-        glstate->vao = glvao;
-    }
-
-    noerrorShim();
-}
-void APIENTRY_GL4ES gl4es_glDeleteVertexArrays(GLsizei n, const GLuint *arrays) {
-    DBG(printf("glDeleteVertexArrays(%i, %p)\n", n, arrays);)
-    if(!glstate) return;
-    FLUSH_BEGINEND;
-
-	khash_t(glvao) *list = glstate->vaos;
-    if (list) {
-        khint_t k;
-        glvao_t *glvao;
-        for (int i = 0; i < n; i++) {
-            GLuint t = arrays[i];
-            if (t) {    // don't allow to remove the default one
-                k = kh_get(glvao, list, t);
-                if (k != kh_end(list)) {
-                    glvao = kh_value(list, k);
-                    VaoSharedClear(glvao);
-                    kh_del(glvao, list, k);
-                    //free(glvao);  //let the use delete those
-                }
-            }
-        }
-    }
-    noerrorShim();
-}
-GLboolean APIENTRY_GL4ES gl4es_glIsVertexArray(GLuint array) {
-    DBG(printf("glIsVertexArray(%u)\n", array);)
-    if(!glstate)
-        return GL_FALSE;
-	khash_t(glvao) *list = glstate->vaos;
-	khint_t k;
-	noerrorShim();
-    if (list) {
-		k = kh_get(glvao, list, array);
-		if (k != kh_end(list)) {
-			return GL_TRUE;
-		}
-	}
-	return GL_FALSE;
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glGenVertexArrays(GLsizei n, GLuint *arrays) {
+//     DBG(printf("glGenVertexArrays(%i, %p)\n", n, arrays);)
+// 	noerrorShim();
+//     if (n<1) {
+// 		errorShim(GL_INVALID_VALUE);
+//         return;
+//     }
+//     for (int i=0; i<n; i++) {   // TODO: create VAO here and check unicity
+//         arrays[i] = lastvao++;
+//     }
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glBindVertexArray(GLuint array) {
+//     DBG(printf("glBindVertexArray(%u)\n", array);)
+//     FLUSH_BEGINEND;
+// 
+//    	khint_t k;
+//    	int ret;
+// 	khash_t(glvao) *list = glstate->vaos;
+//     // if array = 0 => unbind buffer!
+//     if (array == 0) {
+//         // unbind buffer
+//         glstate->vao = glstate->defaultvao;
+//     } else {
+//         // search for an existing buffer
+//         k = kh_get(glvao, list, array);
+//         glvao_t *glvao = NULL;
+//         if (k == kh_end(list)){
+//             k = kh_put(glvao, list, array, &ret);
+//             glvao = kh_value(list, k) = malloc(sizeof(glvao_t));
+//             // new vao is binded to nothing
+//             VaoInit(glvao);
+//             // Copy current status to new VAO
+//             glvao->vertex = glstate->vao->vertex;
+//             glvao->elements = glstate->vao->elements;
+//             glvao->pack = glstate->vao->pack;
+//             glvao->unpack = glstate->vao->unpack;
+//             glvao->maxtex = glstate->vao->maxtex;
+// 
+//             // just put is number
+//             glvao->array = array;
+//         } else {
+//             glvao = kh_value(list, k);
+//         }
+//         glstate->vao = glvao;
+//     }
+// 
+//     noerrorShim();
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glDeleteVertexArrays(GLsizei n, const GLuint *arrays) {
+//     DBG(printf("glDeleteVertexArrays(%i, %p)\n", n, arrays);)
+//     if(!glstate) return;
+//     FLUSH_BEGINEND;
+// 
+// 	khash_t(glvao) *list = glstate->vaos;
+//     if (list) {
+//         khint_t k;
+//         glvao_t *glvao;
+//         for (int i = 0; i < n; i++) {
+//             GLuint t = arrays[i];
+//             if (t) {    // don't allow to remove the default one
+//                 k = kh_get(glvao, list, t);
+//                 if (k != kh_end(list)) {
+//                     glvao = kh_value(list, k);
+//                     VaoSharedClear(glvao);
+//                     kh_del(glvao, list, k);
+//                     //free(glvao);  //let the use delete those
+//                 }
+//             }
+//         }
+//     }
+//     noerrorShim();
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// GLboolean APIENTRY_GL4ES gl4es_glIsVertexArray(GLuint array) {
+//     DBG(printf("glIsVertexArray(%u)\n", array);)
+//     if(!glstate)
+//         return GL_FALSE;
+// 	khash_t(glvao) *list = glstate->vaos;
+// 	khint_t k;
+// 	noerrorShim();
+//     if (list) {
+// 		k = kh_get(glvao, list, array);
+// 		if (k != kh_end(list)) {
+// 			return GL_TRUE;
+// 		}
+// 	}
+// 	return GL_FALSE;
+// }
 
 void VaoSharedClear(glvao_t *vao) {
     if(vao==NULL || vao->shared_arrays==NULL)
@@ -935,8 +942,9 @@ void VaoInit(glvao_t *vao) {
 }
 
 //Direct wrapper
-AliasExport(void,glGenVertexArrays,,(GLsizei n, GLuint *arrays));
-AliasExport(void,glBindVertexArray,,(GLuint array));
-AliasExport(void,glDeleteVertexArrays,,(GLsizei n, const GLuint *arrays));
-AliasExport(GLboolean,glIsVertexArray,,(GLuint array));
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// AliasExport(void,glGenVertexArrays,,(GLsizei n, GLuint *arrays));
+// AliasExport(void,glBindVertexArray,,(GLuint array));
+// AliasExport(void,glDeleteVertexArrays,,(GLsizei n, const GLuint *arrays));
+// AliasExport(GLboolean,glIsVertexArray,,(GLuint array));
 

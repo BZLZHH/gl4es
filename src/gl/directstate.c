@@ -382,34 +382,38 @@ void APIENTRY_GL4ES gl4es_glDisableClientStateIndexed(GLenum array, GLuint index
 }
 AliasDecl(void,gl4es_glDisableClientStatei,(GLenum array, GLuint index),gl4es_glDisableClientStateIndexed);
 
-void APIENTRY_GL4ES gl4es_glEnableVertexArray(GLuint vaobj, GLenum array) {
-    DBG(printf("glEnableVertexArray(%d, %s)\n", vaobj, PrintEnum(array));)
-    GLuint old = glstate->vao->array;
-    gl4es_glBindVertexArray(vaobj);
-    gl4es_glEnableClientState(array);
-    gl4es_glBindVertexArray(old);
-}
-void APIENTRY_GL4ES gl4es_glDisableVertexArray(GLuint vaobj, GLenum array) {
-    DBG(printf("glDisableVertexArray(%d, %s)\n", vaobj, PrintEnum(array));)
-    GLuint old = glstate->vao->array;
-    gl4es_glBindVertexArray(vaobj);
-    gl4es_glDisableClientState(array);
-    gl4es_glBindVertexArray(old);
-}
-void APIENTRY_GL4ES gl4es_glEnableVertexArrayAttrib(GLuint vaobj, GLuint index) {
-    DBG(printf("glEnableVertexArrayAttrib(%d, %d)\n", vaobj, index);)
-    GLuint old = glstate->vao->array;
-    gl4es_glBindVertexArray(vaobj);
-    gl4es_glEnableVertexAttribArray(index);
-    gl4es_glBindVertexArray(old);
-}
-void APIENTRY_GL4ES gl4es_glDisableVertexArrayAttrib(GLuint vaobj, GLuint index) {
-    DBG(printf("glDisableVertexArrayAttrib(%d, %d)\n", vaobj, index);)
-    GLuint old = glstate->vao->array;
-    gl4es_glBindVertexArray(vaobj);
-    gl4es_glDisableVertexAttribArray(index);
-    gl4es_glBindVertexArray(old);
-}
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glEnableVertexArray(GLuint vaobj, GLenum array) {
+//     DBG(printf("glEnableVertexArray(%d, %s)\n", vaobj, PrintEnum(array));)
+//     GLuint old = glstate->vao->array;
+//     gl4es_glBindVertexArray(vaobj);
+//     gl4es_glEnableClientState(array);
+//     gl4es_glBindVertexArray(old);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glDisableVertexArray(GLuint vaobj, GLenum array) {
+//     DBG(printf("glDisableVertexArray(%d, %s)\n", vaobj, PrintEnum(array));)
+//     GLuint old = glstate->vao->array;
+//     gl4es_glBindVertexArray(vaobj);
+//     gl4es_glDisableClientState(array);
+//     gl4es_glBindVertexArray(old);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glEnableVertexArrayAttrib(GLuint vaobj, GLuint index) {
+//     DBG(printf("glEnableVertexArrayAttrib(%d, %d)\n", vaobj, index);)
+//     GLuint old = glstate->vao->array;
+//     gl4es_glBindVertexArray(vaobj);
+//     gl4es_glEnableVertexAttribArray(index);
+//     gl4es_glBindVertexArray(old);
+// }
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glDisableVertexArrayAttrib(GLuint vaobj, GLuint index) {
+//     DBG(printf("glDisableVertexArrayAttrib(%d, %d)\n", vaobj, index);)
+//     GLuint old = glstate->vao->array;
+//     gl4es_glBindVertexArray(vaobj);
+//     gl4es_glDisableVertexAttribArray(index);
+//     gl4es_glBindVertexArray(old);
+// }
 
 #define GETXXX(XXX, xxx) \
 void APIENTRY_GL4ES gl4es_glGet##XXX##Indexedv(GLenum target, GLuint index, GL##xxx *data) { \
@@ -639,10 +643,11 @@ AliasExport(void,glEnableClientStateIndexed,EXT,(GLenum array, GLuint index));
 AliasExport(void,glDisableClientStateIndexed,EXT,(GLenum array, GLuint index));
 AliasExport_A(void,glEnableClientStatei,EXT,(GLenum array, GLuint index),glEnableClientStateIndexed);
 AliasExport_A(void,glDisableClientStatei,EXT,(GLenum array, GLuint index),glEnableClientStateIndexed);
-AliasExport(void,glEnableVertexArray,EXT,(GLuint vaobj, GLenum array));
-AliasExport(void,glDisableVertexArray,EXT,(GLuint vaobj, GLenum array));
-AliasExport(void,glEnableVertexArrayAttrib,EXT,(GLuint vaobj, GLuint index));
-AliasExport(void,glDisableVertexArrayAttrib,EXT,(GLuint vaobj, GLuint index));
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// AliasExport(void,glEnableVertexArray,EXT,(GLuint vaobj, GLenum array));
+// AliasExport(void,glDisableVertexArray,EXT,(GLuint vaobj, GLenum array));
+// AliasExport(void,glEnableVertexArrayAttrib,EXT,(GLuint vaobj, GLuint index));
+// AliasExport(void,glDisableVertexArrayAttrib,EXT,(GLuint vaobj, GLuint index));
 AliasExport(void,glGetPointerIndexedv,EXT,(GLenum pname, GLuint index, GLvoid **params));
 AliasExport(void,glGetFloatIndexedv,EXT,(GLenum target, GLuint index, GLfloat *data));
 AliasExport(void,glGetDoubleIndexedv,EXT,(GLenum target, GLuint index, GLdouble *data));

@@ -127,9 +127,9 @@ void BuildExtensionsList() {
                 "GL_EXT_texture_object "
                 "GL_EXT_polygon_offset "
                 "GL_GL4ES_hint "
-                "GL_ARB_draw_elements_base_vertex "
-                "GL_EXT_draw_elements_base_vertex "
-                "GL_ARB_map_buffer_range "
+                // "GL_ARB_draw_elements_base_vertex "  // OpenGL 3.0+ extension removed
+                // "GL_EXT_draw_elements_base_vertex "  // OpenGL 3.0+ extension removed
+                // "GL_ARB_map_buffer_range "           // OpenGL 3.0+ extension removed
                 "GL_NV_blend_square "
 //                "GL_EXT_blend_logic_op "
 				);
@@ -205,8 +205,8 @@ void BuildExtensionsList() {
                 "GL_ATIX_texture_env_route "
                 "GL_NV_texture_env_combine4 "
                 "GL_NV_fog_distance "
-                "GL_ARB_draw_instanced "
-                "GL_ARB_instanced_arrays "
+                // "GL_ARB_draw_instanced "        // OpenGL 3.0+ extension removed
+                // "GL_ARB_instanced_arrays "     // OpenGL 3.0+ extension removed
                 );
             if(!globals4es.noarbprogram)
                 strcat(extensions,
@@ -1145,20 +1145,21 @@ void APIENTRY_GL4ES gl4es_glGetClipPlanef(GLenum plane, GLfloat * equation)
 AliasExport(void,glGetClipPlanef,,(GLenum plane, GLfloat * equation));
 
 
-const GLubyte* APIENTRY_GL4ES gl4es_glGetStringi(GLenum name, GLuint index) {
-    DBG(printf("glGetStringi(%s, %d)\n", PrintEnum(name), index);)
-    BuildExtensionsList();
-    if (name!=GL_EXTENSIONS) {
-        errorShim(GL_INVALID_ENUM);
-        return NULL;
-    }
-    if (index<0 || index>=glstate->num_extensions) {
-        errorShim(GL_INVALID_VALUE);
-        return NULL;
-    }
-    return glstate->extensions_list[index];
-}
-AliasExport(const GLubyte*,glGetStringi,,(GLenum name, GLuint index));
+// OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+// const GLubyte* APIENTRY_GL4ES gl4es_glGetStringi(GLenum name, GLuint index) {
+//     DBG(printf("glGetStringi(%s, %d)\n", PrintEnum(name), index);)
+//     BuildExtensionsList();
+//     if (name!=GL_EXTENSIONS) {
+//         errorShim(GL_INVALID_ENUM);
+//         return NULL;
+//     }
+//     if (index<0 || index>=glstate->num_extensions) {
+//         errorShim(GL_INVALID_VALUE);
+//         return NULL;
+//     }
+//     return glstate->extensions_list[index];
+// }
+// AliasExport(const GLubyte*,glGetStringi,,(GLenum name, GLuint index));
 
 // Some stuff from the ARB_imaging extension
 void gl4es_glGetMinmaxParameteriv(GLenum target, GLenum pname, GLint* params)

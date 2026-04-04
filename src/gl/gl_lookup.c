@@ -69,8 +69,9 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EX(glCopyBufferSubData);
     _ARB(glCopyBufferSubData);
 
-    _EX(glMapBufferRange);
-    _EX(glFlushMappedBufferRange);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glMapBufferRange);
+    // _EX(glFlushMappedBufferRange);
     // Named Buffer
     _EX(glNamedBufferData);
     _EX(glNamedBufferSubData);
@@ -86,84 +87,94 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EXT(glUnmapNamedBuffer);
     _EXT(glGetNamedBufferSubData);
     _EXT(glGetNamedBufferPointerv);
-    // GL_ARB_vertex_array_object
-    _EX(glGenVertexArrays);
-    _EX(glBindVertexArray);
-    _EX(glDeleteVertexArrays);
-    _EX(glIsVertexArray);
-    _ARB(glGenVertexArrays);
-    _ARB(glBindVertexArray);
-    _ARB(glDeleteVertexArrays);
-    _ARB(glIsVertexArray);
-    _EXT(glGenVertexArrays);
-    _EXT(glBindVertexArray);
-    _EXT(glDeleteVertexArrays);
-    _EXT(glIsVertexArray);
+    // GL_ARB_vertex_array_object - OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glGenVertexArrays);
+    // _EX(glBindVertexArray);
+    // _EX(glDeleteVertexArrays);
+    // _EX(glIsVertexArray);
+    // _ARB(glGenVertexArrays);
+    // _ARB(glBindVertexArray);
+    // _ARB(glDeleteVertexArrays);
+    // _ARB(glIsVertexArray);
+    // _EXT(glGenVertexArrays);
+    // _EXT(glBindVertexArray);
+    // _EXT(glDeleteVertexArrays);
+    // _EXT(glIsVertexArray);
     
     // GL_ARB_frameBuffer_ext
     if(hardext.fbo) {
-        _EX(glFramebufferTexture1D);
-        _EX(glFramebufferTexture3D);
-        _EX(glFramebufferTextureLayer);
-        _EX(glRenderbufferStorageMultisample);
-        _EX(glBlitFramebuffer);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _EX(glFramebufferTexture1D);
+        // _EX(glFramebufferTexture3D);
+        // _EX(glFramebufferTextureLayer);
+        // _EX(glRenderbufferStorageMultisample);
+        // _EX(glBlitFramebuffer);
         _EXT(glGenFramebuffers);
         _EXT(glDeleteFramebuffers);
         _EXT(glIsFramebuffer);
         _EXT(glCheckFramebufferStatus);
         _EXT(glBindFramebuffer);
         _EXT(glFramebufferTexture2D);
-        _EXT(glFramebufferTexture1D);
-        _EXT(glFramebufferTexture3D);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _EXT(glFramebufferTexture1D);
+        // _EXT(glFramebufferTexture3D);
         _EXT(glGenRenderbuffers);
         _EXT(glFramebufferRenderbuffer);
         _EXT(glDeleteRenderbuffers);
         _EXT(glRenderbufferStorage);
-        _EXT(glRenderbufferStorageMultisample);
+        // OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+        // _EXT(glRenderbufferStorageMultisample);
         _EXT(glBindRenderbuffer);
         _EXT(glIsRenderbuffer);
         _EXT(glGenerateMipmap);
         _EXT(glGetFramebufferAttachmentParameteriv);
         _EXT(glGetRenderbufferParameteriv);
-        _EXT(glFramebufferTextureLayer);
-        _EXT(glBlitFramebuffer);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _EXT(glFramebufferTextureLayer);
+        // _EXT(glBlitFramebuffer);
         _ARB(glGenFramebuffers);
         _ARB(glDeleteFramebuffers);
         _ARB(glIsFramebuffer);
         _ARB(glCheckFramebufferStatus);
         _ARB(glBindFramebuffer);
         _ARB(glFramebufferTexture2D);
-        _ARB(glFramebufferTexture1D);
-        _ARB(glFramebufferTexture3D);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _ARB(glFramebufferTexture1D);
+        // _ARB(glFramebufferTexture3D);
         _ARB(glGenRenderbuffers);
         _ARB(glFramebufferRenderbuffer);
         _ARB(glDeleteRenderbuffers);
         _ARB(glRenderbufferStorage);
-        _ARB(glRenderbufferStorageMultisample);
+        // OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+        // _ARB(glRenderbufferStorageMultisample);
         _ARB(glBindRenderbuffer);
         _ARB(glIsRenderbuffer);
         _ARB(glGenerateMipmap);
         _ARB(glGetFramebufferAttachmentParameteriv);
         _ARB(glGetRenderbufferParameteriv);
-        _ARB(glFramebufferTextureLayer);
-        _ARB(glBlitFramebuffer);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _ARB(glFramebufferTextureLayer);
+        // _ARB(glBlitFramebuffer);
         _EX(glDrawBuffers);
         _ARB(glDrawBuffers);
-        _EX(glClearBufferiv);
-        _EX(glClearBufferuiv);
-        _EX(glClearBufferfv);
-        _EX(glClearBufferfi);
-        _EX(glClearNamedFramebufferiv)
-        _EX(glClearNamedFramebufferuiv)
-        _EX(glClearNamedFramebufferfv)
-        _EX(glClearNamedFramebufferfi)
-        _EXT(glClearNamedFramebufferiv)
-        _EXT(glClearNamedFramebufferuiv)
-        _EXT(glClearNamedFramebufferfv)
-        _EXT(glClearNamedFramebufferfi)
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _EX(glClearBufferiv);
+        // _EX(glClearBufferuiv);
+        // _EX(glClearBufferfv);
+        // _EX(glClearBufferfi);
+        // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+        // _EX(glClearNamedFramebufferiv)
+        // _EX(glClearNamedFramebufferuiv)
+        // _EX(glClearNamedFramebufferfv)
+        // _EX(glClearNamedFramebufferfi)
+        // _EXT(glClearNamedFramebufferiv)
+        // _EXT(glClearNamedFramebufferuiv)
+        // _EXT(glClearNamedFramebufferfv)
+        // _EXT(glClearNamedFramebufferfi)
 
         // draw_buffer_2 (partial)
-        _EXT(glColorMaskIndexed)
+        // OpenGL 3.0+ function removed for OpenGL 2.1 compatibility
+        // _EXT(glColorMaskIndexed)
     }
     
     // GL_EXT_vertex_array
@@ -455,7 +466,6 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EX(glGetPixelMapuiv);
     _EX(glGetPixelMapusv);
     STUB(glGetPolygonStipple);
-    _EX(glGetStringi);
     STUB(glPassThrough);
     _EX(glPixelMapfv);
     _EX(glPixelMapuiv);
@@ -566,10 +576,11 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EX(glDisableClientStateIndexed);
     _EX(glEnableClientStatei);
     _EX(glDisableClientStatei);
-    _EX(glEnableVertexArray);
-    _EX(glDisableVertexArray);
-    _EX(glEnableVertexArrayAttrib);
-    _EX(glDisableVertexArrayAttrib);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glEnableVertexArray);
+    // _EX(glDisableVertexArray);
+    // _EX(glEnableVertexArrayAttrib);
+    // _EX(glDisableVertexArrayAttrib);
     _EX(glGetFloatIndexedv);
     _EX(glGetDoubleIndexedv);
     _EX(glGetIntegerIndexedv);
@@ -674,10 +685,11 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EXT(glDisableClientStateIndexed);
     _EXT(glEnableClientStatei);
     _EXT(glDisableClientStatei);
-    _EXT(glEnableVertexArray);
-    _EXT(glDisableVertexArray);
-    _EXT(glEnableVertexArrayAttrib);
-    _EXT(glDisableVertexArrayAttrib);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EXT(glEnableVertexArray);
+    // _EXT(glDisableVertexArray);
+    // _EXT(glEnableVertexArrayAttrib);
+    // _EXT(glDisableVertexArrayAttrib);
     _EXT(glGetFloatIndexedv);
     _EXT(glGetDoubleIndexedv);
     _EXT(glGetIntegerIndexedv);
@@ -964,31 +976,34 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _ARB(glProgramBinary);
 
     //ARB_draw_elements_base_vertex / EXT_draw_elements_base_vertex
-    _EX(glDrawElementsBaseVertex);
-    _EXT(glDrawElementsBaseVertex);
-    _ARB(glDrawElementsBaseVertex);
-    _EX(glDrawRangeElementsBaseVertex);
-    _EXT(glDrawRangeElementsBaseVertex);
-    _ARB(glDrawRangeElementsBaseVertex);
-    _EX(glMultiDrawElementsBaseVertex);
-    _EXT(glMultiDrawElementsBaseVertex);
-    _ARB(glMultiDrawElementsBaseVertex);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glDrawElementsBaseVertex);
+    // _EXT(glDrawElementsBaseVertex);
+    // _ARB(glDrawElementsBaseVertex);
+    // _EX(glDrawRangeElementsBaseVertex);
+    // _EXT(glDrawRangeElementsBaseVertex);
+    // _ARB(glDrawRangeElementsBaseVertex);
+    // _EX(glMultiDrawElementsBaseVertex);
+    // _EXT(glMultiDrawElementsBaseVertex);
+    // _ARB(glMultiDrawElementsBaseVertex);
 
     //GL_ARB_draw_instanced
-    _EX(glDrawArraysInstanced);
-    _EXT(glDrawArraysInstanced); // not sure _EXT is needed...
-    _ARB(glDrawArraysInstanced);
-    _EX(glDrawElementsInstanced);
-    _EXT(glDrawElementsInstanced);
-    _ARB(glDrawElementsInstanced);
-    _EX(glDrawElementsInstancedBaseVertex);
-    _EXT(glDrawElementsInstancedBaseVertex);
-    _ARB(glDrawElementsInstancedBaseVertex);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glDrawArraysInstanced);
+    // _EXT(glDrawArraysInstanced); // not sure _EXT is needed...
+    // _ARB(glDrawArraysInstanced);
+    // _EX(glDrawElementsInstanced);
+    // _EXT(glDrawElementsInstanced);
+    // _ARB(glDrawElementsInstanced);
+    // _EX(glDrawElementsInstancedBaseVertex);
+    // _EXT(glDrawElementsInstancedBaseVertex);
+    // _ARB(glDrawElementsInstancedBaseVertex);
 
     //GL_ARB_instanced_arrays
-    _EX(glVertexAttribDivisor);
-    _EXT(glVertexAttribDivisor);
-    _ARB(glVertexAttribDivisor);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glVertexAttribDivisor);
+    // _EXT(glVertexAttribDivisor);
+    // _ARB(glVertexAttribDivisor);
 
     // stub non-squared matrix access
     STUB(glUniformMatrix2x3fv);
@@ -1003,8 +1018,9 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
     _EX(glTexStorage2D);
     _EX(glTexStorage3D);
 
-    _EX(glClampColor);
-    _EXT(glClampColor);
+    // OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glClampColor);
+    // _EXT(glClampColor);
 
     //GL_ARB_vertex_program
     if(hardext.esversion>1) {
@@ -1035,21 +1051,21 @@ void* APIENTRY_GL4ES gl4es_GetProcAddress(const char *name) {
 
     // GL 3.0
 
-    //Sampler
-    _EX(glGenSamplers);
-    _EX(glBindSampler);
-    _EX(glDeleteSamplers);
-    _EX(glIsSampler);
-    _EX(glSamplerParameterf);
-    _EX(glSamplerParameteri);
-    _EX(glSamplerParameterfv);
-    _EX(glSamplerParameteriv);
-    _EX(glSamplerParameterIiv);
-    _EX(glSamplerParameterIuiv);
-    _EX(glGetSamplerParameterfv);
-    _EX(glGetSamplerParameteriv);
-    _EX(glGetSamplerParameterIiv);
-    _EX(glGetSamplerParameterIuiv);
+    //Sampler - OpenGL 3.3+ functions removed for OpenGL 2.1 compatibility
+    // _EX(glGenSamplers);
+    // _EX(glBindSampler);
+    // _EX(glDeleteSamplers);
+    // _EX(glIsSampler);
+    // _EX(glSamplerParameterf);
+    // _EX(glSamplerParameteri);
+    // _EX(glSamplerParameterfv);
+    // _EX(glSamplerParameteriv);
+    // _EX(glSamplerParameterIiv);
+    // _EX(glSamplerParameterIuiv);
+    // _EX(glGetSamplerParameterfv);
+    // _EX(glGetSamplerParameteriv);
+    // _EX(glGetSamplerParameterIiv);
+    // _EX(glGetSamplerParameterIuiv);
 
     // IPointer
     //_EX(glVertexAttribIPointer);

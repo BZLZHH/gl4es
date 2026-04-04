@@ -107,10 +107,11 @@ void APIENTRY_GL4ES gl4es_glEnableClientStateIndexed(GLenum array, GLuint index)
 void APIENTRY_GL4ES gl4es_glDisableClientStateIndexed(GLenum array, GLuint index);
 void APIENTRY_GL4ES gl4es_glEnableClientStatei(GLenum array, GLuint index);
 void APIENTRY_GL4ES gl4es_glDisableClientStatei(GLenum array, GLuint index);
-void APIENTRY_GL4ES gl4es_glEnableVertexArray(GLuint vaobj, GLenum array);
-void APIENTRY_GL4ES gl4es_glDisableVertexArray(GLuint vaobj, GLenum array);
-void APIENTRY_GL4ES gl4es_glEnableVertexArrayAttrib(GLuint vaobj, GLuint index);
-void APIENTRY_GL4ES gl4es_glDisableVertexArrayAttrib(GLuint vaobj, GLuint index);
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glEnableVertexArray(GLuint vaobj, GLenum array);
+// void APIENTRY_GL4ES gl4es_glDisableVertexArray(GLuint vaobj, GLenum array);
+// void APIENTRY_GL4ES gl4es_glEnableVertexArrayAttrib(GLuint vaobj, GLuint index);
+// void APIENTRY_GL4ES gl4es_glDisableVertexArrayAttrib(GLuint vaobj, GLuint index);
 
 void APIENTRY_GL4ES gl4es_glGetFloatIndexedv(GLenum target, GLuint index, GLfloat *data);
 void APIENTRY_GL4ES gl4es_glGetDoubleIndexedv(GLenum target, GLuint index, GLdouble *data);

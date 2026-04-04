@@ -35,8 +35,9 @@ GLboolean APIENTRY_GL4ES gl4es_glUnmapBuffer(GLenum target);
 void APIENTRY_GL4ES gl4es_glGetBufferPointerv(GLenum target, GLenum pname, GLvoid ** params);
 void APIENTRY_GL4ES gl4es_glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid * data);
 
-void* APIENTRY_GLES gl4es_glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
-void APIENTRY_GL4ES gl4es_glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length);
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void* APIENTRY_GLES gl4es_glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+// void APIENTRY_GL4ES gl4es_glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length);
 
 void APIENTRY_GL4ES gl4es_glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
 
@@ -222,15 +223,17 @@ void VaoInit(glvao_t *vao);
 
 KHASH_MAP_DECLARE_INT(glvao, glvao_t*);
 
-void APIENTRY_GL4ES gl4es_glGenVertexArrays(GLsizei n, GLuint *arrays);
-void APIENTRY_GL4ES gl4es_glBindVertexArray(GLuint array);
-void APIENTRY_GL4ES gl4es_glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
-GLboolean APIENTRY_GL4ES gl4es_glIsVertexArray(GLuint array);
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES gl4es_glGenVertexArrays(GLsizei n, GLuint *arrays);
+// void APIENTRY_GL4ES gl4es_glBindVertexArray(GLuint array);
+// void APIENTRY_GL4ES gl4es_glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
+// GLboolean APIENTRY_GL4ES gl4es_glIsVertexArray(GLuint array);
 
-void APIENTRY_GL4ES glGenVertexArrays(GLsizei n, GLuint *arrays);
-void APIENTRY_GL4ES glBindVertexArray(GLuint array);
-void APIENTRY_GL4ES glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
-GLboolean APIENTRY_GL4ES glIsVertexArray(GLuint array);
+// OpenGL 3.0+ functions removed for OpenGL 2.1 compatibility
+// void APIENTRY_GL4ES glGenVertexArrays(GLsizei n, GLuint *arrays);
+// void APIENTRY_GL4ES glBindVertexArray(GLuint array);
+// void APIENTRY_GL4ES glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
+// GLboolean APIENTRY_GL4ES glIsVertexArray(GLuint array);
 
 void APIENTRY_GL4ES gl4es_glNamedBufferData(GLuint buffer, GLsizeiptr size, const GLvoid * data, GLenum usage);
 void APIENTRY_GL4ES gl4es_glNamedBufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const GLvoid * data);

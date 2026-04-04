@@ -20,7 +20,7 @@ void APIENTRY_GL4ES gl4es_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloa
 void APIENTRY_GL4ES gl4es_glGetVertexAttribiv(GLuint index, GLenum pname, GLint *params);
 void APIENTRY_GL4ES gl4es_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid **pointer);
 
-// GL_ARB_instanced_arrays
-void APIENTRY_GL4ES gl4es_glVertexAttribDivisor(GLuint index, GLuint divisor);
+// GL_ARB_instanced_arrays (OpenGL 3.0+)
+// void APIENTRY_GL4ES gl4es_glVertexAttribDivisor(GLuint index, GLuint divisor);
 
 #endif // _GL4ES_VERTEXATTRIB_H_
