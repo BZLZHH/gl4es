@@ -1085,7 +1085,7 @@ GLboolean APIENTRY_GL4ES gl4es_glIsRenderbuffer(GLuint renderbuffer) {
     noerrorShim();
     return((find_renderbuffer(renderbuffer)!=NULL)?GL_TRUE:GL_FALSE);
 }
-
+/*
 void APIENTRY_GL4ES gl4es_glGenerateMipmap(GLenum target) {
     DBG(printf("glGenerateMipmap(%s)\n", PrintEnum(target));)
     LOAD_GLES2_OR_OES(glGenerateMipmap);
@@ -1107,7 +1107,7 @@ void APIENTRY_GL4ES gl4es_glGenerateMipmap(GLenum target) {
         /*if(bound->sampler.min_filer != bound->actual.min_filter)  // mainly for S3TC textures...
             gl4es_glTexParameteri(target, GL_TEXTURE_MIN_FILTER, bound->sampler.min_filer);*/
     }
-}
+}*/
 
 void APIENTRY_GL4ES gl4es_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint *params) {
     DBG(printf("glGetFramebufferAttachmentParameteriv(%s, %s, %s, %p)\n", PrintEnum(target), PrintEnum(attachment), PrintEnum(pname), params);)
@@ -1392,7 +1392,7 @@ void deleteMainFBO(void *state) {
 
 #ifndef NOX11
 void gl4es_SwapBuffers_currentContext();    // defined in glx/glx.c
-#endif
+#endif/*
 void APIENTRY_GL4ES gl4es_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
     // mask will be ignored
     // filter will be taken only for ReadFBO has no Texture attached (so readpixel is used)
@@ -1404,7 +1404,7 @@ void APIENTRY_GL4ES gl4es_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX
 
     if(glstate->fbo.fbo_read == glstate->fbo.fbo_draw && srcX0==dstX0 && srcX1==dstX1 && srcY0==dstY0 && srcY1==dstY1)
         return; // no need to try copying on itself
-    
+
     if(dstX1==dstX0 || dstY1==dstY0)
         return; // nothing to draw
     if(srcX1==srcX0 || srcY1==srcY0)
@@ -1501,7 +1501,7 @@ void APIENTRY_GL4ES gl4es_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX
     if(blitfullscreen)  // hack, force a swapbuffer (help wine d3d show stuff on certain games)
         gl4es_SwapBuffers_currentContext();
 #endif
-}
+}*/
 
 GLuint gl4es_getCurrentFBO() {
   return (glstate->fbo.current_fb->id)?glstate->fbo.current_fb->id:glstate->fbo.mainfbo_fbo;
@@ -1778,7 +1778,7 @@ AliasExport(void,glDeleteRenderbuffers,,(GLsizei n, GLuint *renderbuffers));
 AliasExport(void,glRenderbufferStorage,,(GLenum target, GLenum internalformat, GLsizei width, GLsizei height));
 AliasExport(void,glBindRenderbuffer,,(GLenum target, GLuint renderbuffer));
 AliasExport(GLboolean,glIsRenderbuffer,,(GLuint renderbuffer));
-AliasExport(void,glGenerateMipmap,,(GLenum target));
+// AliasExport(void,glGenerateMipmap,,(GLenum target));
 AliasExport(void,glGetFramebufferAttachmentParameteriv,,(GLenum target, GLenum attachment, GLenum pname, GLint *params));
 AliasExport(void,glGetRenderbufferParameteriv,,(GLenum target, GLenum pname, GLint * params));
 // OpenGL 3.0+ function removed for OpenGL 2.1 compatibility

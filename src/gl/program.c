@@ -700,7 +700,7 @@ int gl4es_getProgramBinary(GLuint program, int *length, GLenum *format, void** b
 
     return (*length);
 }
-
+/*
 void APIENTRY_GL4ES gl4es_glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary)
 {
     if(hardext.prgbin_n==0) {
@@ -712,8 +712,8 @@ void APIENTRY_GL4ES gl4es_glGetProgramBinary(GLuint program, GLsizei bufSize, GL
     LOAD_GLES_OES(glGetProgramBinary);
     gles_glGetProgramBinary(glprogram->id, bufSize, length, binaryFormat, binary);
     errorGL();
-}
-
+}*/
+/*
 void APIENTRY_GL4ES gl4es_glProgramBinary(GLuint program, GLenum binaryFormat, const void *binary, GLsizei length)
 {
     if(hardext.prgbin_n==0) {
@@ -725,7 +725,7 @@ void APIENTRY_GL4ES gl4es_glProgramBinary(GLuint program, GLenum binaryFormat, c
         noerrorShim();
     else
         errorShim(GL_INVALID_OPERATION);
-}
+}*/
 
 void APIENTRY_GL4ES gl4es_glLinkProgram(GLuint program) {
     DBG(printf("glLinkProgram(%d)\n", program);)
@@ -861,9 +861,9 @@ AliasExport(void,glLinkProgram,,(GLuint program));
 AliasExport(void,glUseProgram,,(GLuint program));
 AliasExport(void,glValidateProgram,,(GLuint program));
 AliasExport(void,glGetProgramInfoLog,,(GLuint program, GLsizei maxLength, GLsizei *length, GLchar *infoLog));
-
+/*
 AliasExport(void,glGetProgramBinary,,(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary));
-AliasExport(void,glProgramBinary,,(GLuint program, GLenum binaryFormat, const void *binary, GLsizei length));
+AliasExport(void,glProgramBinary,,(GLuint program, GLenum binaryFormat, const void *binary, GLsizei length));*/
 
 
 // ================ GL_ARB_vertex_shader =================

@@ -1018,7 +1018,7 @@ void APIENTRY_GL4ES gl4es_glMultiDrawElements( GLenum mode, GLsizei *counts, GLe
 }
 AliasExport(void,glMultiDrawElements,,( GLenum mode, GLsizei *count, GLenum type, const void * const *indices, GLsizei primcount));
 
-
+/*
 
 
 
@@ -1028,7 +1028,7 @@ AliasExport(void,glMultiDrawElements,,( GLenum mode, GLsizei *count, GLenum type
 void APIENTRY_GL4ES gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount) {
     DBG(printf("glDrawElementsInstanced(%s, %d, %s, %p, %d), list=%p pending=%d\n", PrintEnum(mode), count, PrintEnum(type), indices, primcount, glstate->list.active, glstate->list.pending);)
     count = adjust_vertices(mode, count);
-    
+
     if (count<0) {
 		errorShim(GL_INVALID_VALUE);
 		return;
@@ -1043,7 +1043,7 @@ void APIENTRY_GL4ES gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GL
 
     //BATCH Mode
     if(!compiling) {
-        if((!intercept && !glstate->list.pending && (count>=MIN_BATCH && count<=MAX_BATCH)) 
+        if((!intercept && !glstate->list.pending && (count>=MIN_BATCH && count<=MAX_BATCH))
             || (intercept && globals4es.maxbatch)) {
             compiling = true;
             glstate->list.pending = 1;
@@ -1056,7 +1056,7 @@ void APIENTRY_GL4ES gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GL
     GLuint *iindices = NULL;
     GLuint old_index = 0;
     bool need_free = !(
-        (type==GL_UNSIGNED_SHORT) || 
+        (type==GL_UNSIGNED_SHORT) ||
         (!compiling && !intercept && type==GL_UNSIGNED_INT && hardext.elementuint)
         );
     if(need_free) {
@@ -1090,7 +1090,7 @@ void APIENTRY_GL4ES gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GL
         list->indice_cap = count;
         list->instanceCount = primcount;
         //end_renderlist(list);
-        
+
         if(glstate->list.pending) {
             NewStage(glstate->list.active, STAGE_POSTDRAW);
         } else {
@@ -1128,8 +1128,8 @@ void APIENTRY_GL4ES gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GL
     }
 }
 AliasExport(void,glDrawElementsInstanced,,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount));
-AliasExport(void,glDrawElementsInstanced,ARB,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount));
-
+AliasExport(void,glDrawElementsInstanced,ARB,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount));*/
+/*
 void APIENTRY_GL4ES gl4es_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex) {
     DBG(printf("glDrawElementsInstanceBaseVertex(%s, %d, %s, %p, %d, %d), vtx=%p map=%p, pending=%d\n", PrintEnum(mode), count, PrintEnum(type), indices, primcount, basevertex, (glstate->vao->vertex)?glstate->vao->vertex->data:NULL, (glstate->vao->elements)?glstate->vao->elements->data:NULL, glstate->list.pending);)
     if(basevertex==0)
@@ -1227,4 +1227,4 @@ void APIENTRY_GL4ES gl4es_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei
     }
 }
 AliasExport(void,glDrawElementsInstancedBaseVertex,,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex));
-AliasExport(void,glDrawElementsInstancedBaseVertex,ARB,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex));
+AliasExport(void,glDrawElementsInstancedBaseVertex,ARB,(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex));*/

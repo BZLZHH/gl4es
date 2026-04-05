@@ -16,7 +16,7 @@
 #else
 #define DBG(a)
 #endif
-
+/*
 KHASH_MAP_IMPL_INT(samplerlist_t, glsampler_t *);
 
 GLuint new_sampler(GLuint base) {
@@ -424,4 +424,4 @@ void gl4es_glGetSamplerParameterIuiv(GLuint sampler, GLenum pname, GLuint * para
         else
             params[0] = fparams[0];
     }
-}
+}*/
