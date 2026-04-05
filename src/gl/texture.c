@@ -15,6 +15,7 @@
 #include "matrix.h"
 #include "pixel.h"
 #include "raster.h"
+#include <GL/gl.h>
 
 //#define DEBUG
 #ifdef DEBUG
@@ -23,8 +24,8 @@
 #define DBG(a)
 #endif
 
-#ifndef GL_TEXTURE_STREAM_IMG  
-#define GL_TEXTURE_STREAM_IMG                                   0x8C0D     
+#ifndef GL_TEXTURE_STREAM_IMG
+#define GL_TEXTURE_STREAM_IMG                                   0x8C0D
 #endif
 #ifdef TEXSTREAM
 #include <EGL/egl.h>
@@ -42,9 +43,9 @@ int npot(int n) {
 }
 
 static int inline nlevel(int size, int level) {
-    if(size) {
-        size>>=level;
-        if(!size) size=1;
+    if (size) {
+        size >>= level;
+        if (!size) size = 1;
     }
     return size;
 }
@@ -52,10 +53,10 @@ static int inline nlevel(int size, int level) {
 // return the max level for that WxH size
 static int inline maxlevel(int w, int h) {
     int mlevel = 0;
-    while(w!=1 || h!=1) {
-        w>>=1; h>>=1; 
-        if(!w) w=1;
-        if(!h) h=1;
+    while (w != 1 || h != 1) {
+        w >>= 1; h >>= 1;
+        if (!w) w = 1;
+        if (!h) h = 1;
         ++mlevel;
     }
     return mlevel;
@@ -63,423 +64,478 @@ static int inline maxlevel(int w, int h) {
 
 static int is_fake_compressed_rgb(GLenum internalformat)
 {
-    if(internalformat==GL_COMPRESSED_RGB) return 1;
-    if(internalformat==GL_COMPRESSED_RGB_S3TC_DXT1_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_SRGB_S3TC_DXT1_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_RGB) return 1;
+    if (internalformat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_SRGB_S3TC_DXT1_EXT) return 1;
     return 0;
 }
 static int is_fake_compressed_rgba(GLenum internalformat)
 {
-    if(internalformat==GL_COMPRESSED_RGBA) return 1;
-    if(internalformat==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT) return 1;
-    if(internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_RGBA) return 1;
+    if (internalformat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT) return 1;
+    if (internalformat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT) return 1;
     return 0;
 }
 
-void internal2format_type(GLenum internalformat, GLenum *format, GLenum *type)
+void internal2format_type(GLenum internalformat, GLenum* format, GLenum* type)
 {
-    switch(internalformat) {
-        case GL_RED:
-        case GL_R8:
-        case GL_R:
-            if(!hardext.rgtex) {
-                *format = GL_RGB;
-                *type = GL_UNSIGNED_BYTE;
-            } else {
-                *format = GL_RED;
-                *type = GL_UNSIGNED_BYTE;
-            }
-            break;
-        case GL_RG:
-            if(!hardext.rgtex) {
-                *format = GL_RGB;
-                *type = GL_UNSIGNED_BYTE;
-            } else {
-                *format = GL_RG;
-                *type = GL_UNSIGNED_BYTE;
-            }
-            break;
-        case GL_COMPRESSED_ALPHA:
-        case GL_ALPHA:
-            *format = GL_ALPHA;
-            *type = GL_UNSIGNED_BYTE;
-            break;
-        case 1: // is this here or with GL_RED?
-        case GL_COMPRESSED_LUMINANCE:
-        case GL_LUMINANCE:
-            *format = GL_LUMINANCE;
-            *type = GL_UNSIGNED_BYTE;
-            break;
-        case 2:
-        case GL_COMPRESSED_LUMINANCE_ALPHA:
-        case GL_LUMINANCE8_ALPHA8:
-        case GL_LUMINANCE_ALPHA:
-            if(globals4es.nolumalpha) {
-                *format = GL_RGBA;
-                *type = GL_UNSIGNED_BYTE;
-            } else {
-                *format = GL_LUMINANCE_ALPHA;
-                *type = GL_UNSIGNED_BYTE;
-            }
-            break;
-        case GL_RGB5:
-        case GL_RGB565:
+    switch (internalformat) {
+    case GL_RED:
+    case GL_R8:
+    case GL_R:
+        if (!hardext.rgtex) {
             *format = GL_RGB;
-            *type = GL_UNSIGNED_SHORT_5_6_5;
-            break;
-        case GL_RGB:
-            if(globals4es.avoid24bits)
-                *format = GL_RGBA;
-            else
-                *format = GL_RGB;
             *type = GL_UNSIGNED_BYTE;
-            break;
-        case GL_RGB5_A1:
-            *format = GL_RGBA;
-            *type = GL_UNSIGNED_SHORT_5_5_5_1;
-            break;
-        case GL_RGBA4:
-            *format = GL_RGBA;
-            *type = GL_UNSIGNED_SHORT_4_4_4_4;
-            break;
-        case GL_RGBA:
+        }
+        else {
+            *format = GL_RED;
+            *type = GL_UNSIGNED_BYTE;
+        }
+        break;
+    case GL_RG:
+        if (!hardext.rgtex) {
+            *format = GL_RGB;
+            *type = GL_UNSIGNED_BYTE;
+        }
+        else {
+            *format = GL_RG;
+            *type = GL_UNSIGNED_BYTE;
+        }
+        break;
+    case GL_COMPRESSED_ALPHA:
+    case GL_ALPHA:
+        *format = GL_ALPHA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case 1: // is this here or with GL_RED?
+    case GL_COMPRESSED_LUMINANCE:
+    case GL_LUMINANCE:
+        *format = GL_LUMINANCE;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case 2:
+    case GL_COMPRESSED_LUMINANCE_ALPHA:
+    case GL_LUMINANCE8_ALPHA8:
+    case GL_LUMINANCE_ALPHA:
+        if (globals4es.nolumalpha) {
             *format = GL_RGBA;
             *type = GL_UNSIGNED_BYTE;
-            break;
-        case GL_BGRA:
-            if(hardext.bgra8888)
-                *format = GL_BGRA;
-            else
-                *format = GL_RGBA;
+        }
+        else {
+            *format = GL_LUMINANCE_ALPHA;
             *type = GL_UNSIGNED_BYTE;
-            break;
-        case GL_DEPTH_COMPONENT:
-            *format = GL_DEPTH_COMPONENT;
-            if (*type != GL_UNSIGNED_SHORT) {
-                *type = (hardext.depth24)?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT;
-            }
-            break;
-        case GL_DEPTH_STENCIL:
-        case GL_DEPTH24_STENCIL8:
-            *format = GL_DEPTH_STENCIL;
-            *type = GL_UNSIGNED_INT_24_8;
-            break;
-        case GL_R16F:
-            if(!hardext.rgtex)
-                *format = GL_RGB;
+        }
+        break;
+    case GL_RGB5:
+    case GL_RGB565:
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case GL_RGB:
+        if (globals4es.avoid24bits)
+            *format = GL_RGBA;
+        else
+            *format = GL_RGB;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case GL_RGB5_A1:
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case GL_RGBA4:
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
+    case GL_RGBA:
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case GL_BGRA:
+        if (hardext.bgra8888)
+            *format = GL_BGRA;
+        else
+            *format = GL_RGBA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case GL_DEPTH_COMPONENT:
+        *format = GL_DEPTH_COMPONENT;
+        if (*type != GL_UNSIGNED_SHORT) {
+            *type = (hardext.depth24) ? (*type == GL_FLOAT ? GL_FLOAT : GL_UNSIGNED_INT) : GL_UNSIGNED_SHORT;
+        }
+        break;
+    case GL_DEPTH_STENCIL:
+    case GL_DEPTH24_STENCIL8:
+        *format = GL_DEPTH_STENCIL;
+        *type = GL_UNSIGNED_INT_24_8;
+        break;
+    case GL_DEPTH32F_STENCIL8:
+        *format = GL_DEPTH_STENCIL;
+        *type = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+        break;
+    case GL_R16F:
+        if (!hardext.rgtex)
+            *format = GL_RGB;
         else
             *format = GL_RED;
-        if(!hardext.halffloattex)
+        if (!hardext.halffloattex)
             *type = GL_UNSIGNED_BYTE;
         else
             *type = GL_HALF_FLOAT_OES;
-            break;
-        case GL_RGBA16F:
-            *format = GL_RGBA;
-            *type = (hardext.halffloattex)?GL_HALF_FLOAT_OES:GL_UNSIGNED_BYTE;
-            break;
-        case GL_RGBA32F:
-            *format = GL_RGBA;
-            *type = (hardext.floattex)?GL_FLOAT:GL_UNSIGNED_BYTE;
-            break;
-        case GL_RGB16F:
-            *format = GL_RGB;
-            *type = (hardext.halffloattex)?GL_HALF_FLOAT_OES:GL_UNSIGNED_BYTE;
-            break;
-        case GL_RGB32F:
-            *format = GL_RGB;
-            *type = (hardext.floattex)?GL_FLOAT:GL_UNSIGNED_BYTE;
-            break;
-        default:
-            printf("LIBGL: Warning, unknown Internalformat (%s)\n", PrintEnum(internalformat));
-            *format = GL_RGBA;
-            *type = GL_UNSIGNED_BYTE;
-            break;
+        break;
+    case GL_RGBA16F:
+        *format = GL_RGBA;
+        *type = (hardext.halffloattex) ? GL_HALF_FLOAT_OES : GL_UNSIGNED_BYTE;
+        break;
+    case GL_RGBA32F:
+        *format = GL_RGBA;
+        *type = (hardext.floattex) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+        break;
+    case GL_RGB16F:
+        *format = GL_RGB;
+        *type = (hardext.halffloattex) ? GL_HALF_FLOAT_OES : GL_UNSIGNED_BYTE;
+        break;
+    case GL_RGB32F:
+        *format = GL_RGB;
+        *type = (hardext.floattex) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+        break;
+    case GL_R32F:
+        *format = GL_RED;
+        *type = GL_FLOAT;
+        break;
+    case GL_R11F_G11F_B10F:
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_INT_10F_11F_11F_REV;
+        break;
+    case GL_RGB10_A2:
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_INT_10_10_10_2;
+        break;
+    case GL_DEPTH_COMPONENT32F:
+        *format = GL_DEPTH_COMPONENT;
+        *type = GL_FLOAT;
+        break;
+    case GL_DEPTH_COMPONENT24:
+        *format = GL_DEPTH_COMPONENT;
+        *type = GL_UNSIGNED_INT;
+        break;
+    case GL_DEPTH_COMPONENT16:
+        *format = GL_DEPTH_COMPONENT;
+        *type = GL_UNSIGNED_SHORT;
+        break;
+    default:
+        printf("LIBGL: Warning, unknown Internalformat (%s)\n", PrintEnum(internalformat));
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
     }
 }
 
-static void *swizzle_texture(GLsizei width, GLsizei height,
-                             GLenum *format, GLenum *type,
-                             GLenum intermediaryformat, GLenum internalformat,
-                             const GLvoid *data, gltexture_t *bound) {
+static void* swizzle_texture(GLsizei width, GLsizei height,
+    GLenum* format, GLenum* type,
+    GLenum intermediaryformat, GLenum internalformat,
+    const GLvoid* data, gltexture_t* bound) {
     int convert = 0;
     GLenum dest_format = GL_RGBA;
     GLenum dest_type = GL_UNSIGNED_BYTE;
     int check = 1;
     // compressed format are not handled here, so mask them....
-    if (is_fake_compressed_rgb(intermediaryformat)) intermediaryformat=GL_RGB;
-    if (is_fake_compressed_rgba(intermediaryformat)) intermediaryformat=GL_RGBA;
-    if (is_fake_compressed_rgb(internalformat)) internalformat=GL_RGB;
-    if (is_fake_compressed_rgba(internalformat)) internalformat=GL_RGBA;
-    if (intermediaryformat==GL_COMPRESSED_LUMINANCE) intermediaryformat=GL_LUMINANCE;
-    if (internalformat==GL_COMPRESSED_LUMINANCE) internalformat=GL_LUMINANCE;
+    if (is_fake_compressed_rgb(intermediaryformat)) intermediaryformat = GL_RGB;
+    if (is_fake_compressed_rgba(intermediaryformat)) intermediaryformat = GL_RGBA;
+    if (is_fake_compressed_rgb(internalformat)) internalformat = GL_RGB;
+    if (is_fake_compressed_rgba(internalformat)) internalformat = GL_RGBA;
+    if (intermediaryformat == GL_COMPRESSED_LUMINANCE) intermediaryformat = GL_LUMINANCE;
+    if (internalformat == GL_COMPRESSED_LUMINANCE) internalformat = GL_LUMINANCE;
 
-    if(*format != intermediaryformat || intermediaryformat!=internalformat) {
+    if (*format != intermediaryformat || intermediaryformat != internalformat) {
         internal2format_type(intermediaryformat, &dest_format, &dest_type);
         convert = 1;
         check = 0;
-    } else {
-        if((*type)==GL_HALF_FLOAT) (*type) = GL_HALF_FLOAT_OES;    //the define is different between GL and GLES...
+    }
+    else {
+        if ((*type) == GL_HALF_FLOAT) (*type) = GL_HALF_FLOAT_OES;    //the define is different between GL and GLES...
         switch (*format) {
-            case GL_R:
-            case GL_RED:
-                if(!hardext.rgtex) {
-                    dest_format = GL_RGB;
-                    convert = 1;
-                } else
-                    dest_format = GL_RED;
-                break;
-            case GL_RG:
-                if(!hardext.rgtex) {
-                    dest_format = GL_RGB;
-                    convert = 1;
-                } else
-                    dest_format = GL_RG;
-                break;
-            case GL_COMPRESSED_LUMINANCE:
-                *format = GL_LUMINANCE;
-            case GL_LUMINANCE:
-                dest_format = GL_LUMINANCE;
-                break;
-            case GL_LUMINANCE16F:
-                dest_format = GL_LUMINANCE;
-                if(hardext.halffloattex) {
-                    dest_type = GL_HALF_FLOAT_OES;
-                    check = 0;
-                }
-                break;
-            case GL_LUMINANCE32F:
-                dest_format = GL_LUMINANCE;
-                if(hardext.floattex) {
-                    dest_type = GL_FLOAT;
-                    check = 0;
-                }
-                break;
-            case GL_RGB:
+        case GL_R:
+        case GL_RED:
+            if (!hardext.rgtex) {
                 dest_format = GL_RGB;
-                break;
-            case GL_COMPRESSED_ALPHA:
-                *format = GL_ALPHA;
-            case GL_ALPHA:
-                dest_format = GL_ALPHA;
-                break;
-            case GL_ALPHA16F:
-                dest_format = GL_ALPHA;
-                if(hardext.halffloattex) {
-                    dest_type = GL_HALF_FLOAT_OES;
-                    check = 0;
-                }
-                break;
-            case GL_ALPHA32F:
-                dest_format = GL_ALPHA;
-                if(hardext.floattex) {
-                    dest_type = GL_FLOAT;
-                    check = 0;
-                }
-                break;
-            case GL_RGBA:
-                break;
-            case GL_LUMINANCE8_ALPHA8:
-            case GL_COMPRESSED_LUMINANCE_ALPHA:
-                if(globals4es.nolumalpha)
-                    convert = 1;
-                else {
-                    dest_format = GL_LUMINANCE_ALPHA;
-                    *format = GL_LUMINANCE_ALPHA;
-                }
-                break;
-            case GL_LUMINANCE_ALPHA:
-                if(globals4es.nolumalpha)
-                    convert = 1;
-                else
-                    dest_format = GL_LUMINANCE_ALPHA;
-                break;
-            case GL_LUMINANCE_ALPHA16F:
-                if(globals4es.nolumalpha)
-                    convert = 1;
-                else
-                    dest_format = GL_LUMINANCE_ALPHA;
-                if(hardext.halffloattex) {
-                    dest_type = GL_HALF_FLOAT_OES;
-                    check = 0;
-                }
-                break;
-            case GL_LUMINANCE_ALPHA32F:
-                if(globals4es.nolumalpha)
-                    convert = 1;
-                else
-                    dest_format = GL_LUMINANCE_ALPHA;
-                if(hardext.floattex) {
-                    dest_type = GL_FLOAT;
-                    check = 0;
-                }
-                break;
+                convert = 1;
+            }
+            else
+                dest_format = GL_RED;
+            break;
+        case GL_RG:
+            if (!hardext.rgtex) {
+                dest_format = GL_RGB;
+                convert = 1;
+            }
+            else
+                dest_format = GL_RG;
+            break;
+        case GL_COMPRESSED_LUMINANCE:
+            *format = GL_LUMINANCE;
+        case GL_LUMINANCE:
+            dest_format = GL_LUMINANCE;
+            break;
+        case GL_LUMINANCE16F:
+            dest_format = GL_LUMINANCE;
+            if (hardext.halffloattex) {
+                dest_type = GL_HALF_FLOAT_OES;
+                check = 0;
+            }
+            break;
+        case GL_LUMINANCE32F:
+            dest_format = GL_LUMINANCE;
+            if (hardext.floattex) {
+                dest_type = GL_FLOAT;
+                check = 0;
+            }
+            break;
+        case GL_RGB:
+            dest_format = GL_RGB;
+            break;
+        case GL_COMPRESSED_ALPHA:
+            *format = GL_ALPHA;
+        case GL_ALPHA:
+            dest_format = GL_ALPHA;
+            break;
+        case GL_ALPHA16F:
+            dest_format = GL_ALPHA;
+            if (hardext.halffloattex) {
+                dest_type = GL_HALF_FLOAT_OES;
+                check = 0;
+            }
+            break;
+        case GL_ALPHA32F:
+            dest_format = GL_ALPHA;
+            if (hardext.floattex) {
+                dest_type = GL_FLOAT;
+                check = 0;
+            }
+            break;
+        case GL_RGBA:
+            break;
+        case GL_LUMINANCE8_ALPHA8:
+        case GL_COMPRESSED_LUMINANCE_ALPHA:
+            if (globals4es.nolumalpha)
+                convert = 1;
+            else {
+                dest_format = GL_LUMINANCE_ALPHA;
+                *format = GL_LUMINANCE_ALPHA;
+            }
+            break;
+        case GL_LUMINANCE_ALPHA:
+            if (globals4es.nolumalpha)
+                convert = 1;
+            else
+                dest_format = GL_LUMINANCE_ALPHA;
+            break;
+        case GL_LUMINANCE_ALPHA16F:
+            if (globals4es.nolumalpha)
+                convert = 1;
+            else
+                dest_format = GL_LUMINANCE_ALPHA;
+            if (hardext.halffloattex) {
+                dest_type = GL_HALF_FLOAT_OES;
+                check = 0;
+            }
+            break;
+        case GL_LUMINANCE_ALPHA32F:
+            if (globals4es.nolumalpha)
+                convert = 1;
+            else
+                dest_format = GL_LUMINANCE_ALPHA;
+            if (hardext.floattex) {
+                dest_type = GL_FLOAT;
+                check = 0;
+            }
+            break;
             // vvvvv all this are internal formats, so it should not happens
-            case GL_RGB5:
-            case GL_RGB565:
-                dest_format = GL_RGB;
-                dest_type = GL_UNSIGNED_SHORT_5_6_5;
+        case GL_RGB5:
+        case GL_RGB565:
+            dest_format = GL_RGB;
+            dest_type = GL_UNSIGNED_SHORT_5_6_5;
+            convert = 1;
+            check = 0;
+            break;
+        case GL_RGB8:
+            dest_format = GL_RGB;
+            *format = GL_RGB;
+            break;
+        case GL_RGBA4:
+            dest_format = GL_RGBA;
+            dest_type = GL_UNSIGNED_SHORT_4_4_4_4;
+            *format = GL_RGBA;
+            check = 0;
+            break;
+        case GL_RGBA8:
+            dest_format = GL_RGBA;
+            *format = GL_RGBA;
+            break;
+        case GL_BGRA:
+            if (hardext.bgra8888 && ((*type) == GL_UNSIGNED_BYTE || (*type) == GL_FLOAT || (*type) == GL_HALF_FLOAT ||
+#ifdef __BIG_ENDIAN__
+            (((*type) == GL_UNSIGNED_INT_8_8_8_8_REV) && hardext.rgba8888rev)
+#else
+                (((*type) == GL_UNSIGNED_INT_8_8_8_8) && hardext.rgba8888)
+#endif
+                ))
+            {
+                dest_format = GL_BGRA;
+                //*format = GL_BGRA;
+            }
+            else {
                 convert = 1;
-                check = 0;
-                break;
-            case GL_RGB8:
-                dest_format = GL_RGB;
-                *format = GL_RGB;
-                break;
-            case GL_RGBA4:
-                dest_format = GL_RGBA;
-                dest_type = GL_UNSIGNED_SHORT_4_4_4_4;
-                *format = GL_RGBA;
-                check = 0;
-                break;
-            case GL_RGBA8:
-                dest_format = GL_RGBA;
-                *format = GL_RGBA;
-                break;
-            case GL_BGRA:
-                if(hardext.bgra8888 && ((*type)==GL_UNSIGNED_BYTE || (*type)==GL_FLOAT || (*type)==GL_HALF_FLOAT ||
-                #ifdef __BIG_ENDIAN__
-                    (((*type)==GL_UNSIGNED_INT_8_8_8_8_REV) && hardext.rgba8888rev)
-                #else
-                    (((*type)==GL_UNSIGNED_INT_8_8_8_8) && hardext.rgba8888)
-                #endif
-                )) 
-                {
-                    dest_format = GL_BGRA;
-                    //*format = GL_BGRA;
-                } else {
-                    convert = 1;
-                    if(hardext.bgra8888 && 
-                    #ifdef __BIG_ENDIAN__
-                        (*type==GL_UNSIGNED_INT_8_8_8_8_REV)
-                    #else
-                        (*type==GL_UNSIGNED_INT_8_8_8_8)
-                    #endif
+                if (hardext.bgra8888 &&
+#ifdef __BIG_ENDIAN__
+                (*type == GL_UNSIGNED_INT_8_8_8_8_REV)
+#else
+                    (*type == GL_UNSIGNED_INT_8_8_8_8)
+#endif
                     ) {
-                        //*format = GL_BGRA;    //only type needs conversion
-                        dest_format = GL_BGRA;
-                        check = 0;
-                    }
+                    //*format = GL_BGRA;    //only type needs conversion
+                    dest_format = GL_BGRA;
+                    check = 0;
                 }
-                break;
-            case GL_DEPTH24_STENCIL8:
-            case GL_DEPTH_STENCIL:
-                if(hardext.depthtex && hardext.depthstencil) {
-                    *format = dest_format = GL_DEPTH_STENCIL;
-                    dest_type = GL_UNSIGNED_INT_24_8;
-                    check = 0;
-                } else convert = 1;
-                break;
-            case GL_DEPTH_COMPONENT:
-            case GL_DEPTH_COMPONENT16:
-            case GL_DEPTH_COMPONENT24:
-            case GL_DEPTH_COMPONENT32:
-                if(hardext.depthtex) {
-                    if(dest_type==GL_UNSIGNED_BYTE) {
-                        dest_type=(*format==GL_DEPTH_COMPONENT32 || *format==GL_DEPTH_COMPONENT24)?GL_UNSIGNED_INT:GL_UNSIGNED_SHORT;
-                        convert = 1;
-                    }
-                    *format = dest_format = GL_DEPTH_COMPONENT;
-                    check = 0;
-                } else
+            }
+            break;
+        case GL_DEPTH32F_STENCIL8:
+        case GL_DEPTH24_STENCIL8:
+        case GL_DEPTH_STENCIL:
+            if (hardext.depthtex && hardext.depthstencil) {
+                const int is32F = *format == GL_DEPTH32F_STENCIL8;
+                *format = dest_format = GL_DEPTH_STENCIL;
+                dest_type = is32F ? GL_FLOAT_32_UNSIGNED_INT_24_8_REV : GL_UNSIGNED_INT_24_8;
+                check = 0;
+            }
+            else convert = 1;
+            break;
+        case GL_DEPTH_COMPONENT:
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
+            if (hardext.depthtex) {
+                if (dest_type == GL_UNSIGNED_BYTE) {
+                    if (*format == GL_DEPTH_COMPONENT32 || *format == GL_DEPTH_COMPONENT24)
+                        dest_type = GL_UNSIGNED_INT;
+                    else if (*format == GL_DEPTH_COMPONENT32F)
+                        dest_type = GL_FLOAT;
+                    else
+                        dest_type = GL_UNSIGNED_SHORT;
                     convert = 1;
-                break;
-            case GL_STENCIL_INDEX8:
-                if(hardext.stenciltex)
-                    *format = dest_format = GL_STENCIL_INDEX8;
-                else
-                    convert = 1;
-                break;
-            default:
+                }
+                *format = dest_format = GL_DEPTH_COMPONENT;
+                check = 0;
+            }
+            else
                 convert = 1;
-                break;
+            break;
+        case GL_STENCIL_INDEX8:
+            if (hardext.stenciltex)
+                *format = dest_format = GL_STENCIL_INDEX8;
+            else
+                convert = 1;
+            break;
+        default:
+            convert = 1;
+            break;
         }
-        if(check)
-        switch (*type) {
+        if (check)
+            switch (*type) {
             case GL_UNSIGNED_SHORT_4_4_4_4_REV:
-                if(dest_format==GL_RGBA)
+                if (dest_format == GL_RGBA)
                     dest_type = GL_UNSIGNED_SHORT_4_4_4_4;
                 convert = 1;
                 break;
             case GL_UNSIGNED_SHORT_4_4_4_4:
-                if(dest_format==GL_RGBA)
+                if (dest_format == GL_RGBA)
                     dest_type = GL_UNSIGNED_SHORT_4_4_4_4;
                 else
                     convert = 1;
                 break;
             case GL_UNSIGNED_SHORT_1_5_5_5_REV:
-                if(!hardext.rgba1555rev) {
-                    if(dest_format==GL_RGBA)
+                if (!hardext.rgba1555rev) {
+                    if (dest_format == GL_RGBA)
                         dest_type = GL_UNSIGNED_SHORT_5_5_5_1;
                     convert = 1;
                 }
                 break;
             case GL_UNSIGNED_SHORT_5_5_5_1:
-                if(dest_format==GL_RGBA)
+                if (dest_format == GL_RGBA)
                     dest_type = GL_UNSIGNED_SHORT_5_5_5_1;
                 else
                     convert = 1;
                 break;
             case GL_UNSIGNED_SHORT_5_6_5_REV:
-                if (dest_format==GL_RGB)
+                if (dest_format == GL_RGB)
                     dest_type = GL_UNSIGNED_SHORT_5_6_5;
                 convert = 1;
                 break;
             case GL_UNSIGNED_SHORT_5_6_5:
-                if (dest_format==GL_RGB)
+                if (dest_format == GL_RGB)
                     dest_type = GL_UNSIGNED_SHORT_5_6_5;
                 else
                     convert = 1;
                 break;
-            #ifdef __BIG_ENDIAN__
+#ifdef __BIG_ENDIAN__
             case GL_UNSIGNED_INT_8_8_8_8:
-            #else
+#else
             case GL_UNSIGNED_INT_8_8_8_8_REV:
-            #endif
-                *type = GL_UNSIGNED_BYTE;
+#endif
+                * type = GL_UNSIGNED_BYTE;
                 // fall through
             case GL_UNSIGNED_BYTE:
-                if(dest_format==GL_RGB && globals4es.avoid24bits) {
+                if (dest_format == GL_RGB && globals4es.avoid24bits) {
                     dest_format = GL_RGBA;
                     convert = 1;
                 }
                 break;
-            #ifdef __BIG_ENDIAN__
+#ifdef __BIG_ENDIAN__
             case GL_UNSIGNED_INT_8_8_8_8_REV:
-                if(!hardext.rgba8888rev) {
+                if (!hardext.rgba8888rev) {
                     dest_type = GL_UNSIGNED_BYTE;
                     convert = 1;
                 }
                 break;
-            #else
+#else
             case GL_UNSIGNED_INT_8_8_8_8:
-                if(!hardext.rgba8888) {
+                if (!hardext.rgba8888) {
                     dest_type = GL_UNSIGNED_BYTE;
                     convert = 1;
                 }
                 break;
-            #endif
+#endif
             case GL_UNSIGNED_INT_24_8:
-                if(hardext.depthtex && hardext.depthstencil) {
+                if (hardext.depthtex && hardext.depthstencil) {
                     dest_type = GL_UNSIGNED_INT_24_8;
-                } else {
+                }
+                else {
+                    *type = GL_UNSIGNED_BYTE;   // will probably do nothing good!
+                    convert = 1;
+                }
+                break;
+            case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
+                if (hardext.floattex && hardext.depthstencil) {
+                    dest_type = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+                }
+                else {
                     *type = GL_UNSIGNED_BYTE;   // will probably do nothing good!
                     convert = 1;
                 }
                 break;
             case GL_FLOAT:
-                if(hardext.floattex)
+                if (hardext.floattex)
                     dest_type = GL_FLOAT;
                 else
                     convert = 1;
                 break;
             case GL_HALF_FLOAT:
             case GL_HALF_FLOAT_OES:
-                if(hardext.halffloattex)
+                if (hardext.halffloattex)
                     dest_type = GL_HALF_FLOAT_OES;
                 else
                     convert = 1;
@@ -487,60 +543,62 @@ static void *swizzle_texture(GLsizei width, GLsizei height,
             default:
                 convert = 1;
                 break;
-        }
+            }
     }
     if (data) {
         if (convert) {
-            GLvoid *pixels = (GLvoid *)data;
+            GLvoid* pixels = (GLvoid*)data;
             bound->inter_format = dest_format;
             bound->format = dest_format;
             bound->inter_type = dest_type;
             bound->type = dest_type;
-            if (! pixel_convert(data, &pixels, width, height,
-                                *format, *type, dest_format, dest_type, 0, glstate->texture.unpack_align)) {
+            if (!pixel_convert(data, &pixels, width, height,
+                *format, *type, dest_format, dest_type, 0, glstate->texture.unpack_align)) {
                 printf("LIBGL: swizzle error: (%s, %s -> %s, %s)\n",
                     PrintEnum(*format), PrintEnum(*type), PrintEnum(dest_format), PrintEnum(dest_type));
                 return NULL;
             }
             *type = dest_type;
             *format = dest_format;
-            if(dest_format!=internalformat) {
-                GLvoid *pix2 = (GLvoid *)pixels;
+            if (dest_format != internalformat) {
+                GLvoid* pix2 = (GLvoid*)pixels;
                 internal2format_type(internalformat, &dest_format, &dest_type);
                 bound->format = dest_format;
                 bound->type = dest_type;
-                if (! pixel_convert(pixels, &pix2, width, height,
-                                *format, *type, dest_format, dest_type, 0, glstate->texture.unpack_align)) {
+                if (!pixel_convert(pixels, &pix2, width, height,
+                    *format, *type, dest_format, dest_type, 0, glstate->texture.unpack_align)) {
                     printf("LIBGL: swizzle error: (%s, %s -> %s, %s)\n",
                         PrintEnum(dest_format), PrintEnum(dest_type), PrintEnum(internalformat), PrintEnum(dest_type));
                     return NULL;
                 }
-                if(pix2!=pixels) {
-                    if (pixels!=data)
+                if (pix2 != pixels) {
+                    if (pixels != data)
                         free(pixels);
                     pixels = pix2;
                 }
                 *type = dest_type;
                 *format = dest_format;
             }
-            GLvoid *pix2 = pixels;
+            GLvoid* pix2 = pixels;
             if (raster_need_transform())
                 if (!pixel_transform(data, &pixels, width, height,
-                                *format, *type, glstate->raster.raster_scale, glstate->raster.raster_bias)) {
+                    *format, *type, glstate->raster.raster_scale, glstate->raster.raster_bias)) {
                     printf("LIBGL: swizzle/convert error: (%s, %s -> %s, %s)\n",
                         PrintEnum(*format), PrintEnum(*type), PrintEnum(dest_format), PrintEnum(dest_type));
                     pix2 = pixels;
                 }
-            if (pix2!=pixels && pixels!=data)
+            if (pix2 != pixels && pixels != data)
                 free(pixels);
             return pix2;
-        } else {
+        }
+        else {
             bound->inter_format = dest_format;
             bound->format = dest_format;
             bound->inter_type = dest_type;
             bound->type = dest_type;
         }
-    } else {
+    }
+    else {
         bound->inter_format = dest_format;
         bound->inter_type = dest_type;
         if (convert) {
@@ -551,192 +609,225 @@ static void *swizzle_texture(GLsizei width, GLsizei height,
         bound->format = dest_format;
         bound->type = dest_type;
     }
-    return (void *)data;
+    return (void*)data;
 }
 
-GLenum swizzle_internalformat(GLenum *internalformat, GLenum format, GLenum type) {
+GLenum swizzle_internalformat(GLenum* internalformat, GLenum format, GLenum type) {
     GLenum ret = *internalformat;
     GLenum sret;
-    switch(*internalformat) {
-        case GL_RED:
-        case GL_R:
-        case GL_R8:
-            if(!hardext.rgtex) {
-                ret = GL_RGB; sret = GL_RGB;
-            } else
-                sret = GL_RED;
+    switch (*internalformat) {
+    case GL_RED:
+    case GL_R:
+    case GL_R8:
+        if (!hardext.rgtex) {
+            ret = GL_RGB; sret = GL_RGB;
+        }
+        else
+            sret = GL_RED;
+        break;
+    case GL_R32F:
+        ret = sret = GL_R32F;
+        break;
+    case GL_RGB10_A2:
+        ret = sret = GL_RGB10_A2;
+        break;
+    case GL_RG:
+        if (!hardext.rgtex) {
+            ret = GL_RGB; sret = GL_RGB;
+        }
+        else
+            sret = GL_RG;
+        break;
+    case GL_RGB565:
+        ret = GL_RGB5;
+    case GL_RGB5:
+        sret = GL_RGB5;
+        break;
+    case GL_RGB:
+        if (globals4es.avoid16bits == 0 && format == GL_RGB && type == GL_UNSIGNED_SHORT_5_6_5) {
+            sret = ret = GL_RGB5;
             break;
-        case GL_RG:
-            if(!hardext.rgtex) {
-                ret = GL_RGB; sret = GL_RGB;
-            } else
-                sret = GL_RG;
+        }
+    case GL_RGB8:
+    case GL_BGR:
+    case GL_RGB16:
+    case GL_RGB16F:
+    case GL_RGB32F:
+    case 3:
+        ret = GL_RGB; sret = GL_RGB;
+        break;
+    case GL_RGBA4:
+        sret = GL_RGBA4;
+        break;
+    case GL_RGB5_A1:
+        sret = GL_RGB5_A1;
+        break;
+    case GL_RGBA:
+        if (globals4es.avoid16bits == 0 && format == GL_RGBA && type == GL_UNSIGNED_SHORT_5_5_5_1) {
+            sret = ret = GL_RGB5_A1;
             break;
-        case GL_RGB565:
-            ret=GL_RGB5;
-        case GL_RGB5:
-            sret = GL_RGB5;
+        }
+        if (globals4es.avoid16bits == 0 && format == GL_RGBA && type == GL_UNSIGNED_SHORT_4_4_4_4) {
+            sret = ret = GL_RGBA4;
             break;
-        case GL_RGB:
-             if(globals4es.avoid16bits==0 && format==GL_RGB && type==GL_UNSIGNED_SHORT_5_6_5) {
-                sret = ret = GL_RGB5;
-                break;
-            }
-        case GL_RGB8:
-        case GL_BGR:
-        case GL_RGB16:
-        case GL_RGB16F:
-        case GL_RGB32F:
-        case 3: 
-            ret = GL_RGB; sret = GL_RGB; 
-            break;
-        case GL_RGBA4:
-            sret = GL_RGBA4;
-            break;
-        case GL_RGB5_A1:
-            sret = GL_RGB5_A1;
-            break;
-        case GL_RGBA:
-            if(globals4es.avoid16bits==0 && format==GL_RGBA && type==GL_UNSIGNED_SHORT_5_5_5_1) {
-                sret = ret = GL_RGB5_A1;
-                break;
-            }
-            if(globals4es.avoid16bits==0 && format==GL_RGBA && type==GL_UNSIGNED_SHORT_4_4_4_4) {
-                sret = ret = GL_RGBA4;
-                break;
-            }
-            if(format==GL_BGRA && hardext.bgra8888) {
-                sret = ret = GL_BGRA;
-            }
-        case GL_RGBA8:
-        case GL_RGBA16:
-        case GL_RGBA16F:
-        case GL_RGBA32F:
-        case GL_RGB10_A2:
-        case 4: 
-            if(format==GL_BGRA && hardext.bgra8888) {
-                ret = GL_BGRA; sret = GL_BGRA; 
-            } else {
-                ret = GL_RGBA; sret = GL_RGBA; 
-            }
-            break;
-        case GL_ALPHA32F:
-        case GL_ALPHA16F:
-        case GL_ALPHA8:
-        case GL_ALPHA:
-            ret = GL_ALPHA; sret = GL_ALPHA;
-            break;
-        case 1:
-        case GL_LUMINANCE32F:
-        case GL_LUMINANCE16F:
-        case GL_LUMINANCE8:
-        case GL_LUMINANCE16:
-        case GL_LUMINANCE:
-            if(format==GL_RED && hardext.rgtex) {
-                ret = GL_RED; sret = GL_RED;    
-            } else {
-                ret = GL_LUMINANCE; sret = GL_LUMINANCE;
-            }
-            break;
-        case 2: 
-        case GL_LUMINANCE4_ALPHA4:
-        case GL_LUMINANCE8_ALPHA8:
-        case GL_LUMINANCE16_ALPHA16:
-        case GL_LUMINANCE_ALPHA32F:
-        case GL_LUMINANCE_ALPHA16F:
-        case GL_LUMINANCE_ALPHA:
-            ret = GL_LUMINANCE_ALPHA;
-            if (globals4es.nolumalpha)
-                sret = GL_RGBA;
-            else
-                sret = GL_LUMINANCE_ALPHA;
-            break;
-        // compressed format...
-        case GL_COMPRESSED_ALPHA:
-            ret = GL_ALPHA;//GL_COMPRESSED_RGBA;
-            sret = GL_ALPHA;
-            break;
-        case GL_COMPRESSED_LUMINANCE:
-            ret = GL_LUMINANCE;//GL_COMPRESSED_RGB;
-            sret = GL_LUMINANCE;
-            break;
-        case GL_COMPRESSED_LUMINANCE_ALPHA:
-            if (globals4es.nolumalpha) {
-                ret = GL_COMPRESSED_RGBA;
-                sret = GL_RGBA;
-            } else {
-                ret = GL_LUMINANCE_ALPHA;
-                sret = GL_LUMINANCE_ALPHA;
-            }
-            break;
-        case GL_COMPRESSED_RGB:
-            sret = GL_RGB;
-            break;
-        case GL_COMPRESSED_RGBA:
+        }
+        if (format == GL_BGRA && hardext.bgra8888) {
+            sret = ret = GL_BGRA;
+        }
+    case GL_RGBA8:
+    case GL_RGBA16:
+    case GL_RGBA16F:
+    case GL_RGBA32F:
+    case 4:
+        if (format == GL_BGRA && hardext.bgra8888) {
+            ret = GL_BGRA; sret = GL_BGRA;
+        }
+        else {
+            ret = GL_RGBA; sret = GL_RGBA;
+        }
+        break;
+    case GL_ALPHA32F:
+    case GL_ALPHA16F:
+    case GL_ALPHA8:
+    case GL_ALPHA:
+        ret = GL_ALPHA; sret = GL_ALPHA;
+        break;
+    case 1:
+    case GL_LUMINANCE32F:
+    case GL_LUMINANCE16F:
+    case GL_LUMINANCE8:
+    case GL_LUMINANCE16:
+    case GL_LUMINANCE:
+        if (format == GL_RED && hardext.rgtex) {
+            ret = GL_RED; sret = GL_RED;
+        }
+        else {
+            ret = GL_LUMINANCE; sret = GL_LUMINANCE;
+        }
+        break;
+    case 2:
+    case GL_LUMINANCE4_ALPHA4:
+    case GL_LUMINANCE8_ALPHA8:
+    case GL_LUMINANCE16_ALPHA16:
+    case GL_LUMINANCE_ALPHA32F:
+    case GL_LUMINANCE_ALPHA16F:
+    case GL_LUMINANCE_ALPHA:
+        ret = GL_LUMINANCE_ALPHA;
+        if (globals4es.nolumalpha)
             sret = GL_RGBA;
-            break;
-        case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-        case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:  // should be sRGB...
-            ret = GL_COMPRESSED_RGB;
-            sret = GL_RGB;
-            break;
-        case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:  // not good...
-        case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:  // not good, but there is no DXT3 compressor
-        case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-        case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
-        case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
-        case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+        else
+            sret = GL_LUMINANCE_ALPHA;
+        break;
+        // compressed format...
+    case GL_COMPRESSED_ALPHA:
+        ret = GL_ALPHA;//GL_COMPRESSED_RGBA;
+        sret = GL_ALPHA;
+        break;
+    case GL_COMPRESSED_LUMINANCE:
+        ret = GL_LUMINANCE;//GL_COMPRESSED_RGB;
+        sret = GL_LUMINANCE;
+        break;
+    case GL_COMPRESSED_LUMINANCE_ALPHA:
+        if (globals4es.nolumalpha) {
             ret = GL_COMPRESSED_RGBA;
             sret = GL_RGBA;
-            break;
-        case GL_BGRA:
-            if(hardext.bgra8888) {
-                ret = GL_BGRA;
-                sret = GL_BGRA;
-            } else {
-                ret = GL_RGBA;
-                sret = GL_RGBA;
-            }
-            break;
-        case GL_DEPTH_COMPONENT:
-            if(hardext.depthtex) {
-                sret = ret = GL_DEPTH_COMPONENT;
-            } else {
-                sret = ret = GL_RGBA;
-            }
-            break;
-        case GL_DEPTH_COMPONENT16:
-            if(hardext.depthtex) {
-                sret = ret = GL_DEPTH_COMPONENT;
-            } else {
-                sret = ret = GL_RGBA;
-            }
-            break;
-        case GL_DEPTH_COMPONENT32:
-            if(hardext.depthtex) {
-                sret = ret = GL_DEPTH_COMPONENT;
-            } else {
-                sret = ret = GL_RGBA;
-            }
-            break;
-        case GL_DEPTH24_STENCIL8:
-            if(hardext.depthtex) {
-                sret = ret = GL_DEPTH_STENCIL;
-            } else {
-                sret = ret = GL_RGBA;
-            }
-            break;
-        case GL_STENCIL_INDEX8:
-            if(hardext.stenciltex) {
-                sret = ret = GL_STENCIL_INDEX8;
-            } else {
-                sret = ret = (hardext.rgtex)?GL_RED:GL_LUMINANCE;
-            }
-            break;
-        default:
+        }
+        else {
+            ret = GL_LUMINANCE_ALPHA;
+            sret = GL_LUMINANCE_ALPHA;
+        }
+        break;
+    case GL_COMPRESSED_RGB:
+        sret = GL_RGB;
+        break;
+    case GL_COMPRESSED_RGBA:
+        sret = GL_RGBA;
+        break;
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:  // should be sRGB...
+        ret = GL_COMPRESSED_RGB;
+        sret = GL_RGB;
+        break;
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:  // not good...
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:  // not good, but there is no DXT3 compressor
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+    case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+    case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+    case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+        ret = GL_COMPRESSED_RGBA;
+        sret = GL_RGBA;
+        break;
+    case GL_BGRA:
+        if (hardext.bgra8888) {
+            ret = GL_BGRA;
+            sret = GL_BGRA;
+        }
+        else {
             ret = GL_RGBA;
             sret = GL_RGBA;
-            break;
+        }
+        break;
+    case GL_DEPTH_COMPONENT:
+    case GL_DEPTH_COMPONENT16:
+    case GL_DEPTH_COMPONENT24:
+    case GL_DEPTH_COMPONENT32:
+    case GL_DEPTH_COMPONENT32F:
+        if (hardext.depthtex) {
+            switch (type) {
+            case GL_UNSIGNED_SHORT:
+                sret = ret = GL_DEPTH_COMPONENT16;
+                break;
+            case GL_UNSIGNED_INT:
+                sret = ret = GL_DEPTH_COMPONENT24;
+                break;
+            case GL_FLOAT:
+                sret = ret = GL_DEPTH_COMPONENT32F;
+                break;
+            default:
+                sret = ret = GL_DEPTH_COMPONENT;
+                break;
+            }
+        }
+        else {
+            sret = ret = GL_RGBA;
+        }
+        break;
+    case GL_DEPTH_STENCIL:
+    case GL_DEPTH24_STENCIL8:
+    case GL_DEPTH32F_STENCIL8:
+        if (hardext.depthtex) {
+            switch (type) {
+            case GL_UNSIGNED_INT:
+                sret = ret = GL_DEPTH24_STENCIL8;
+                break;
+            case GL_FLOAT:
+                sret = ret = GL_DEPTH32F_STENCIL8;
+                break;
+            default:
+                sret = ret = GL_DEPTH_STENCIL;
+                break;
+            }
+        }
+        else {
+            sret = ret = GL_RGBA;
+        }
+        break;
+    case GL_STENCIL_INDEX8:
+        if (hardext.stenciltex) {
+            sret = ret = GL_STENCIL_INDEX8;
+        }
+        else {
+            sret = ret = (hardext.rgtex) ? GL_RED : GL_LUMINANCE;
+        }
+        break;
+    case GL_R11F_G11F_B10F:
+        ret = GL_R11F_G11F_B10F;
+        sret = GL_R11F_G11F_B10F;
+        break;
+    default:
+        ret = GL_RGBA;
+        sret = GL_RGBA;
+        break;
         // Default...RGBA / RGBA will be fine....
     }
     *internalformat = ret;
@@ -747,143 +838,149 @@ static int get_shrinklevel(int width, int height, int level) {
     int shrink = 0;
     int mipwidth = width << level;
     int mipheight = height << level;
-    switch(globals4es.texshrink) {
-        case 0: // nothing
-            break;
-        case 1: //everything / 2
-            if ((mipwidth > 1) && (mipheight > 1)) {
-                shrink = 1;
-            }
-            break;
-        case 2: //only > 512 /2
-        case 7: //only > 512 /2 , but not for empty texture
-            if (((mipwidth%2==0) && (mipheight%2==0)) && (
-                ((mipwidth > 512) && (mipheight > 8)) || ((mipheight > 512) && (mipwidth > 8))) ) {
-                shrink = 1;
-            }
-            break;
-        case 3: //only > 256 /2
-            if (((mipwidth%2==0) && (mipheight%2==0)) && (
-                ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8))) ) {
-                shrink = 1;
-            }
-            break;
-        case 4: //only > 256 /2, >=1024 /4
-            if (((mipwidth%4==0) && (mipheight%4==0)) && (
-                ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8))) ) {
-                if ((mipwidth>=1024) || (mipheight>=1024)) {
-                    shrink = 2;
-                } else {
-                    shrink = 1;
-                }
-            }
-            break;
-        case 5: //every > 256 is downscaled to 256, but not for empty texture
-            if (((mipwidth%4==0) && (mipheight%4==0)) && (
-                ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8))) ) {
-                if ((mipwidth>256) || (mipheight>256)) {
-                    while (((mipwidth > 256) && (mipheight > 4)) || ((mipheight > 256) && (mipwidth > 4))) {
-                        width /= 2;
-                        height /= 2;
-                        mipwidth /= 2;
-                        mipheight /= 2;
-                        shrink+=1;
-                    }
-                } else {
-                    shrink = 1;
-                }
-            }
-            break;
-        case 6: //only > 128 /2, >=512 is downscaled to 256, but not for empty texture
-            if (((mipwidth%2==0) && (mipheight%2==0)) && (
-                ((mipwidth > 128) && (mipheight > 8)) || ((mipheight > 128) && (mipwidth > 8))) ) {
-                if ((mipwidth>=512) || (mipheight>=512)) {
-                    while (((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8))) {
-                        width /= 2;
-                        height /= 2;
-                        mipwidth /= 2;
-                        mipheight /= 2;
-                        shrink+=1;
-                    }
-                } else {
-                    shrink = 1;
-                }
-            }
-            break;
-        case 8: //advertise *4 max texture size, but >2048 are shrinked to 2048
-            if ((mipwidth>hardext.maxsize*2) || (mipheight>hardext.maxsize*2)) {
-                shrink=2;
-            } else
-            if ((mipwidth>hardext.maxsize) || (mipheight>hardext.maxsize)) {
-                shrink=1;
-            }
-            break;
-        case 9: //advertise 8192 max texture size, but >4096 are quadshrinked and >512 are shrinked, but not for empty texture
-            if ((mipwidth>hardext.maxsize*2) || (mipheight>hardext.maxsize*2)) {
-                shrink=2;
-            } else
-            if (mipwidth>(hardext.maxsize>>2) || mipheight>(hardext.maxsize>>2)) {
-                shrink=1;
-            }
-            break;
-        case 10://advertise 8192 max texture size, but >2048 are quadshrinked and >512 are shrinked, but not for empty texture
-            if ((mipwidth>hardext.maxsize) || (mipheight>hardext.maxsize)) {
-                shrink=2;
-            } else
-            if ((mipwidth>(hardext.maxsize>>2)) || (mipheight>(hardext.maxsize>>2))) {
-                shrink=1;
-            }
-            break;
-        case 11:// scale down to maxres any dimension > maxres
-            if(mipwidth>hardext.maxsize || mipheight>hardext.maxsize)
-                shrink=1;
-            break;
+    switch (globals4es.texshrink) {
+    case 0: // nothing
+        break;
+    case 1: //everything / 2
+        if ((mipwidth > 1) && (mipheight > 1)) {
+            shrink = 1;
         }
-        
+        break;
+    case 2: //only > 512 /2
+    case 7: //only > 512 /2 , but not for empty texture
+        if (((mipwidth % 2 == 0) && (mipheight % 2 == 0)) && (
+            ((mipwidth > 512) && (mipheight > 8)) || ((mipheight > 512) && (mipwidth > 8)))) {
+            shrink = 1;
+        }
+        break;
+    case 3: //only > 256 /2
+        if (((mipwidth % 2 == 0) && (mipheight % 2 == 0)) && (
+            ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8)))) {
+            shrink = 1;
+        }
+        break;
+    case 4: //only > 256 /2, >=1024 /4
+        if (((mipwidth % 4 == 0) && (mipheight % 4 == 0)) && (
+            ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8)))) {
+            if ((mipwidth >= 1024) || (mipheight >= 1024)) {
+                shrink = 2;
+            }
+            else {
+                shrink = 1;
+            }
+        }
+        break;
+    case 5: //every > 256 is downscaled to 256, but not for empty texture
+        if (((mipwidth % 4 == 0) && (mipheight % 4 == 0)) && (
+            ((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8)))) {
+            if ((mipwidth > 256) || (mipheight > 256)) {
+                while (((mipwidth > 256) && (mipheight > 4)) || ((mipheight > 256) && (mipwidth > 4))) {
+                    width /= 2;
+                    height /= 2;
+                    mipwidth /= 2;
+                    mipheight /= 2;
+                    shrink += 1;
+                }
+            }
+            else {
+                shrink = 1;
+            }
+        }
+        break;
+    case 6: //only > 128 /2, >=512 is downscaled to 256, but not for empty texture
+        if (((mipwidth % 2 == 0) && (mipheight % 2 == 0)) && (
+            ((mipwidth > 128) && (mipheight > 8)) || ((mipheight > 128) && (mipwidth > 8)))) {
+            if ((mipwidth >= 512) || (mipheight >= 512)) {
+                while (((mipwidth > 256) && (mipheight > 8)) || ((mipheight > 256) && (mipwidth > 8))) {
+                    width /= 2;
+                    height /= 2;
+                    mipwidth /= 2;
+                    mipheight /= 2;
+                    shrink += 1;
+                }
+            }
+            else {
+                shrink = 1;
+            }
+        }
+        break;
+    case 8: //advertise *4 max texture size, but >2048 are shrinked to 2048
+        if ((mipwidth > hardext.maxsize * 2) || (mipheight > hardext.maxsize * 2)) {
+            shrink = 2;
+        }
+        else
+            if ((mipwidth > hardext.maxsize) || (mipheight > hardext.maxsize)) {
+                shrink = 1;
+            }
+        break;
+    case 9: //advertise 8192 max texture size, but >4096 are quadshrinked and >512 are shrinked, but not for empty texture
+        if ((mipwidth > hardext.maxsize * 2) || (mipheight > hardext.maxsize * 2)) {
+            shrink = 2;
+        }
+        else
+            if (mipwidth > (hardext.maxsize >> 2) || mipheight > (hardext.maxsize >> 2)) {
+                shrink = 1;
+            }
+        break;
+    case 10://advertise 8192 max texture size, but >2048 are quadshrinked and >512 are shrinked, but not for empty texture
+        if ((mipwidth > hardext.maxsize) || (mipheight > hardext.maxsize)) {
+            shrink = 2;
+        }
+        else
+            if ((mipwidth > (hardext.maxsize >> 2)) || (mipheight > (hardext.maxsize >> 2))) {
+                shrink = 1;
+            }
+        break;
+    case 11:// scale down to maxres any dimension > maxres
+        if (mipwidth > hardext.maxsize || mipheight > hardext.maxsize)
+            shrink = 1;
+        break;
+    }
+
     return shrink;
-} 
+}
 
 int wrap_npot(GLenum wrap) {
-    switch(wrap) {
-        case 0: return (globals4es.defaultwrap)?1:0;
-        case GL_CLAMP:
-        case GL_CLAMP_TO_EDGE:
-        case GL_CLAMP_TO_BORDER:
-            return 1;
+    switch (wrap) {
+    case 0: return (globals4es.defaultwrap) ? 1 : 0;
+    case GL_CLAMP:
+    case GL_CLAMP_TO_EDGE:
+    case GL_CLAMP_TO_BORDER:
+        return 1;
     }
     return 0;
 }
 int minmag_npot(GLenum mag) {
-    switch(mag) {
-        case 0: return 0;   // default is not good
-        case GL_NEAREST:
-        case GL_LINEAR:
-            return 1;
+    switch (mag) {
+    case 0: return 0;   // default is not good
+    case GL_NEAREST:
+    case GL_LINEAR:
+        return 1;
     }
     return 0;
 }
 
 GLenum minmag_forcenpot(GLenum filt) {
-    switch(filt) {
-        case GL_LINEAR:
-        case GL_LINEAR_MIPMAP_NEAREST:
-        case GL_LINEAR_MIPMAP_LINEAR:
-            return GL_LINEAR;
+    switch (filt) {
+    case GL_LINEAR:
+    case GL_LINEAR_MIPMAP_NEAREST:
+    case GL_LINEAR_MIPMAP_LINEAR:
+        return GL_LINEAR;
         /*case 0:
         case GL_NEAREST:
         case GL_NEAREST_MIPMAP_NEATEST:
         case GL_NEAREST_MIPMAP_LINEAR:*/
-        default:
-            return GL_NEAREST;
+    default:
+        return GL_NEAREST;
     }
 }
 GLenum wrap_forcenpot(GLenum wrap) {
-    switch(wrap) {
-        case 0: return GL_CLAMP_TO_EDGE;
-        case GL_CLAMP:
-        case GL_CLAMP_TO_EDGE:
-        case GL_CLAMP_TO_BORDER:
-            return wrap;
+    switch (wrap) {
+    case 0: return GL_CLAMP_TO_EDGE;
+    case GL_CLAMP:
+    case GL_CLAMP_TO_EDGE:
+    case GL_CLAMP_TO_BORDER:
+        return wrap;
         /*case GL_MIRROR_CLAMP_TO_EDGE_EXT:
             return wrap;*/
     }
@@ -891,37 +988,41 @@ GLenum wrap_forcenpot(GLenum wrap) {
 }
 
 GLenum minmag_float(GLenum filt) {
-    switch(filt) {
-        case GL_LINEAR:
-            return GL_NEAREST;
-        case GL_LINEAR_MIPMAP_NEAREST:
-        case GL_LINEAR_MIPMAP_LINEAR:
-        case GL_NEAREST_MIPMAP_LINEAR:
-            return GL_NEAREST_MIPMAP_NEAREST;
-        default:
-            return filt;
+    switch (filt) {
+    case GL_LINEAR:
+        return GL_NEAREST;
+    case GL_LINEAR_MIPMAP_NEAREST:
+    case GL_LINEAR_MIPMAP_LINEAR:
+    case GL_NEAREST_MIPMAP_LINEAR:
+        return GL_NEAREST_MIPMAP_NEAREST;
+    default:
+        return filt;
     }
 }
 
-void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint internalformat,
+void gl4es_glTexImage2D(GLenum target, GLint level, GLint internalformat,
                   GLsizei width, GLsizei height, GLint border,
                   GLenum format, GLenum type, const GLvoid *data) {
-    DBG(printf("glTexImage2D on target=%s with unpack_row_length(%i), size(%i,%i) and skip(%i,%i), format(internal)=%s(%s), type=%s, data=%p, level=%i (mipmap_need=%i, mipmap_auto=%i, base_level=%i, max_level=%i) => texture=%u (streamed=%i), glstate->list.compiling=%d\n", PrintEnum(target), glstate->texture.unpack_row_length, width, height, glstate->texture.unpack_skip_pixels, glstate->texture.unpack_skip_rows, PrintEnum(format), (internalformat==3)?"3":(internalformat==4?"4":PrintEnum(internalformat)), PrintEnum(type), data, level, glstate->texture.bound[glstate->texture.active][what_target(target)]->mipmap_need, glstate->texture.bound[glstate->texture.active][what_target(target)]->mipmap_auto, glstate->texture.bound[glstate->texture.active][what_target(target)]->base_level, glstate->texture.bound[glstate->texture.active][what_target(target)]->max_level, glstate->texture.bound[glstate->texture.active][what_target(target)]->texture, glstate->texture.bound[glstate->texture.active][what_target(target)]->streamed, glstate->list.compiling);)
-    
+    DBG(printf("glTexImage2D on target=%s with unpack_row_length(%i), size(%i,%i) and skip(%i,%i), format(internal)=%s(%s), type=%s, data=%p, level=%i (mipmap_need=%i, mipmap_auto=%i, base_level=%i, max_level=%i) => texture=%u (streamed=%i), glstate->list.compiling=%d\n",
+               PrintEnum(target), glstate->texture.unpack_row_length, width, height, glstate->texture.unpack_skip_pixels, glstate->texture.unpack_skip_rows, PrintEnum(format), (internalformat==3)?"3":(internalformat==4?"4":PrintEnum(internalformat)), PrintEnum(type), data, level, glstate->texture.bound[glstate->texture.active][what_target(target)]->mipmap_need, glstate->texture.bound[glstate->texture.active][what_target(target)]->mipmap_auto, glstate->texture.bound[glstate->texture.active][what_target(target)]->base_level, glstate->texture.bound[glstate->texture.active][what_target(target)]->max_level, glstate->texture.bound[glstate->texture.active][what_target(target)]->texture, glstate->texture.bound[glstate->texture.active][what_target(target)]->streamed, glstate->list.compiling);)
+
     if(data==NULL && (internalformat == GL_RGB16F || internalformat == GL_RGBA16F))
-    internal2format_type(internalformat, &format, &type);
-
+        internal2format_type(internalformat, &format, &type);
     if(internalformat == GL_R16F ) internal2format_type(internalformat, &format, &type);
-
     if(data==NULL && (internalformat == GL_RED || internalformat == GL_RGB))
         internal2format_type(internalformat, &format, &type);
-    
+
+    if (internalformat == GL_DEPTH32F_STENCIL8 && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+        internalformat = GL_DEPTH24_STENCIL8;
+        type = GL_UNSIGNED_INT_24_8;
+    }
+
     // proxy case
     const GLuint itarget = what_target(target);
     const GLuint rtarget = map_tex_target(target);
     LOAD_GLES(glTexImage2D);
     LOAD_GLES(glTexSubImage2D);
-    void gles_glTexParameteri(glTexParameteri_ARG_EXPAND); //LOAD_GLES(glTexParameteri);
+    LOAD_GLES(glTexParameteri);
 
     if(globals4es.force16bits) {
         if(internalformat==GL_RGBA || internalformat==4 || internalformat==GL_RGBA8)
@@ -937,7 +1038,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
         glstate->proxy_intformat = swizzle_internalformat((GLenum *) &internalformat, format, type);
         return;
     }
-    // actually bound if targeting shared TEX2D
+    // actualy bound if targetting shared TEX2D
     realize_bound(glstate->texture.active, target);
 
     if (glstate->list.pending) {
@@ -957,16 +1058,16 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
         type = GL_HALF_FLOAT_OES;
 
     /*if(format==GL_COMPRESSED_LUMINANCE)
-        format = GL_RGB;*/    // Danger from the Deep does that. 
+        format = GL_RGB;*/    // Danger from the Deep does that.
         //That's odd, probably a bug (line 453 of src/texture.cpp, it should be interformat instead of format)
 
     GLvoid *datab = (GLvoid*)data;
-    
+
     if (glstate->vao->unpack)
         datab = (char*)datab + (uintptr_t)glstate->vao->unpack->data;
-        
+
     GLvoid *pixels = (GLvoid *)datab;
-    border = 0;    //TODO: something?
+    border = 0;	//TODO: something?
     noerrorShim();
 
     gltexture_t *bound = glstate->texture.bound[glstate->texture.active][itarget];
@@ -975,7 +1076,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
     if(bound->binded_fbo && (bound->binded_attachment==GL_DEPTH_ATTACHMENT || bound->binded_attachment==GL_STENCIL_ATTACHMENT || bound->binded_attachment==GL_DEPTH_STENCIL_ATTACHMENT))
     {
         // non null data should be handled, but need to convert then...
-        if(data!=NULL) 
+        if(data!=NULL)
             printf("LIBGL: Warning, Depth/stencil texture resized and with data\n");
         // get new size...
         GLsizei nheight = (hardext.npot)?height:npot(height);
@@ -993,7 +1094,12 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                 gl4es_glRenderbufferStorage(GL_RENDERBUFFER, (bound->binded_attachment==GL_DEPTH_ATTACHMENT)?GL_DEPTH_COMPONENT16:GL_DEPTH24_STENCIL8, nwidth, nheight);
                 gl4es_glBindRenderbuffer(GL_RENDERBUFFER, 0);
             } else {
+                errorGL();
+                DBG(printf("gles_glTexImage2D(%d, %d, %s, %d, %d, %d, %s, %s, 0x%x)\n",
+                           GL_TEXTURE_2D, 0, PrintEnum(bound->format), bound->nwidth, bound->nheight, 0, PrintEnum(bound->format),
+                           PrintEnum(bound->type), NULL);)
                 gles_glTexImage2D(GL_TEXTURE_2D, 0, bound->format, bound->nwidth, bound->nheight, 0, bound->format, bound->type, NULL);
+                DBG(CheckGLError(1);)
             }
         }
         if((bound->binded_attachment==GL_STENCIL_ATTACHMENT || bound->binded_attachment==GL_DEPTH_STENCIL_ATTACHMENT) && bound->renderstencil)
@@ -1070,6 +1176,9 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
             case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
             case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
             case GL_COMPRESSED_RGB:
+            case GL_R11F_G11F_B10F:
+            case GL_R32F:
+            case GL_RGB10_A2:
                 bound->fpe_format = FPE_TEX_RGB;
                 break;
             /*case GL_DEPTH_COMPONENT:
@@ -1086,7 +1195,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
     if (globals4es.automipmap) {
         if (level>0)
             if ((globals4es.automipmap==1) || (globals4es.automipmap==3) || bound->mipmap_need) {
-                return;            // has been handled by auto_mipmap
+                return;			// has been handled by auto_mipmap
             }
             else if(globals4es.automipmap==2)
                 bound->mipmap_need = 1;
@@ -1114,7 +1223,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
     if (datab) {
 
         // implements GL_UNPACK_ROW_LENGTH
-        if ((glstate->texture.unpack_row_length && glstate->texture.unpack_row_length != width) 
+        if ((glstate->texture.unpack_row_length && glstate->texture.unpack_row_length != width)
         || glstate->texture.unpack_skip_pixels || glstate->texture.unpack_skip_rows) {
             int imgWidth, pixelSize, dstWidth;
             pixelSize = pixel_sizeof(format, type);
@@ -1210,16 +1319,16 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                 }
             }
         }
-        
+
         if (globals4es.texdump) {
             pixel_to_ppm(pixels, width, height, format, type, bound->texture, glstate->texture.pack_align);
         }
     } else {
 #ifdef TEXSTREAM
-        if (globals4es.texstream && (target==GL_TEXTURE_2D || target==GL_TEXTURE_RECTANGLE_ARB) && (width>=256 && height>=224) && 
+        if (globals4es.texstream && (target==GL_TEXTURE_2D || target==GL_TEXTURE_RECTANGLE_ARB) && (width>=256 && height>=224) &&
         ((internalformat==GL_RGB) || (internalformat==3) || (internalformat==GL_RGB8) || (internalformat==GL_BGR) || (internalformat==GL_RGB5) || (internalformat==GL_RGB565)) || (globals4es.texstream==2) ) {
             bound->streamingID = AddStreamed(width, height, bound->texture);
-            if (bound->streamingID>-1) {    // success
+            if (bound->streamingID>-1) {	// success
                 bound->shrink = 0;  // no shrink on Stream texture
                 bound->streamed = true;
                 glsampler_t *sampler = glstate->samplers.sampler[glstate->texture.active];
@@ -1231,7 +1340,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                 LOAD_GLES(glEnable);
                 if (tmp)
                     gles_glDisable(GL_TEXTURE_2D);
-                ActivateStreaming(bound->streamingID);    //Activate the newly created texture
+                ActivateStreaming(bound->streamingID);	//Activate the newly created texture
                 format = GL_RGB;
                 type = GL_UNSIGNED_SHORT_5_6_5;
                 if (tmp)
@@ -1240,8 +1349,15 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                 glstate->bound_stream[glstate->texture.active] = 1;
         }
 #endif
-        if (!bound->streamed)
-            swizzle_texture(width, height, &format, &type, internalformat, new_format, NULL, bound);    // convert format even if data is NULL
+        if (!bound->streamed && internalformat != GL_R11F_G11F_B10F && internalformat != GL_R32F && internalformat != GL_RGB10_A2)
+            swizzle_texture(width, height, &format, &type, internalformat, new_format, NULL, bound);	// convert format even if data is NULL
+        if (internalformat == GL_R11F_G11F_B10F || internalformat == GL_R32F)
+            type = GL_FLOAT;
+        if (internalformat == GL_RGB10_A2) {
+            if (format == GL_BGRA)
+                format = GL_RGBA;
+            type = GL_UNSIGNED_INT_2_10_10_10_REV;
+        }
         if (bound->shrink!=0) {
             switch(globals4es.texshrink) {
             case 1: //everything / 2
@@ -1257,7 +1373,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                             ratioy = hardext.maxsize/((float)mipheight);
                         else
                             ratioy = 1.0f;
-                    } else 
+                    } else
                         ratiox = ratioy = 0.5;
                     bound->ratiox = ratiox;
                     bound->ratioy = ratioy;
@@ -1287,12 +1403,12 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
             }
         }
     }
-    
+
     /* TODO:
     GL_INVALID_VALUE is generated if border is not 0.
     GL_INVALID_OPERATION is generated if type is
     GL_UNSIGNED_SHORT_5_6_5 and format is not GL_RGB.
-    
+
     GL_INVALID_OPERATION is generated if type is one of
     GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1
     and format is not GL_RGBA.
@@ -1307,14 +1423,14 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
             if(target==GL_TEXTURE_RECTANGLE_ARB && hardext.npot)
                 limitednpot=1;
             else if(hardext.npot==1 && (
-                    (bound->base_level<=0 && bound->max_level==0) 
-                 || (globals4es.automipmap==3) 
-                 || (globals4es.automipmap==4 && width!=height) 
-                 || (globals4es.forcenpot==1) ) 
+                    (bound->base_level<=0 && bound->max_level==0)
+                 || (globals4es.automipmap==3)
+                 || (globals4es.automipmap==4 && width!=height)
+                 || (globals4es.forcenpot==1) )
                  && (wrap_npot(bound->sampler.wrap_s) && wrap_npot(bound->sampler.wrap_t)) )
                  limitednpot=1;
-            else if(hardext.esversion>1 && hardext.npot==1 
-                && (!bound->mipmap_auto || !minmag_npot(bound->sampler.min_filter) || !minmag_npot(bound->sampler.mag_filter)) 
+            else if(hardext.esversion>1 && hardext.npot==1
+                && (!bound->mipmap_auto || !minmag_npot(bound->sampler.min_filter) || !minmag_npot(bound->sampler.mag_filter))
                 && (wrap_npot(bound->sampler.wrap_s) && wrap_npot(bound->sampler.wrap_t)) )
                 limitednpot=1;
             else if(hardext.esversion>1 && hardext.npot==2
@@ -1410,17 +1526,17 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
                     callgeneratemipmap = 1;
             } else {
                 //if(target!=GL_TEXTURE_RECTANGLE_ARB) gles_glTexParameteri( rtarget, GL_GENERATE_MIPMAP, GL_FALSE );
-                if ((itarget!=ENABLED_CUBE_MAP && target!=GL_TEXTURE_RECTANGLE_ARB) 
+                if ((itarget!=ENABLED_CUBE_MAP && target!=GL_TEXTURE_RECTANGLE_ARB)
                 && (bound->mipmap_need || globals4es.automipmap==3)) {
                     // remove the need for mipmap...
                     bound->mipmap_need = 0;
                     gl4es_glTexParameteri(rtarget, GL_TEXTURE_MIN_FILTER, bound->sampler.min_filter); // forcing min_filter to be recomputed
                 }
             }
-            
+
             if (height != nheight || width != nwidth) {
                 errorGL();
-                gles_glTexImage2D(rtarget, level, format, nwidth, nheight, border,
+                gles_glTexImage2D(rtarget, level, internalformat, nwidth, nheight, border,
                                 format, type, NULL);
                 DBG(CheckGLError(1);)
                 if (pixels) {
@@ -1442,7 +1558,10 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
 #endif
             } else {
                 errorGL();
-                gles_glTexImage2D(rtarget, level, format, width, height, border,
+                DBG(printf("gles_glTexImage2D(%d, %d, %s, %d, %d, %d, %s, %s, 0x%x)\n",
+                       rtarget, level, PrintEnum(internalformat), width, height, border, PrintEnum(format),
+                       PrintEnum(type), pixels);)
+                gles_glTexImage2D(rtarget, level, internalformat, width, height, border,
                                 format, type, pixels);
                 DBG(CheckGLError(1);)
             }
@@ -1506,7 +1625,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
             gles_glTexParameteri( rtarget, GL_GENERATE_MIPMAP, GL_FALSE );*/
         } else {
             if (pixels)
-                gl4es_glTexSubImage2D(rtarget, level, 0, 0, width, height, format, type, pixels);    // (should never happens) updload the 1st data...
+                gl4es_glTexSubImage2D(rtarget, level, 0, 0, width, height, format, type, pixels);	// (should never happens) updload the 1st data...
         }
         if(bound->mipmap_need && !bound->mipmap_done) {
             if(bound->mipmap_auto)
@@ -1516,9 +1635,9 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
         }
     }
     if ((target==GL_TEXTURE_2D) && globals4es.texcopydata && ((globals4es.texstream && !bound->streamed) || !globals4es.texstream)) {
-        if (bound->data) 
+        if (bound->data)
             bound->data=realloc(bound->data, width*height*4);
-        else 
+        else
             bound->data = malloc(width*height*4);
         if (datab) {
             if (!pixel_convert(pixels, &bound->data, width, height, format, type, GL_RGBA, GL_UNSIGNED_BYTE, 0, glstate->texture.unpack_align))
@@ -1535,7 +1654,7 @@ void APIENTRY_GL4ES gl4es_glTexImage2D(GLenum target, GLint level, GLint interna
         glstate->bound_changed = glstate->texture.active+1;
 }
 
-void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
+void gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                      GLsizei width, GLsizei height, GLenum format, GLenum type,
                      const GLvoid *data) {
 
@@ -1553,7 +1672,7 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
 #endif
         type = GL_UNSIGNED_BYTE;
 
-    
+
     GLvoid *datab = (GLvoid*)data;
     if (glstate->vao->unpack)
         datab = (char*)datab + (uintptr_t)glstate->vao->unpack->data;
@@ -1563,18 +1682,18 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
     const GLuint rtarget = map_tex_target(target);
 
     LOAD_GLES(glTexSubImage2D);
-    void gles_glTexParameteri(glTexParameteri_ARG_EXPAND); //LOAD_GLES(glTexParameteri);
+    LOAD_GLES(glTexParameteri);
     noerrorShim();
     DBG(printf("glTexSubImage2D on target=%s with unpack_row_length(%d), size(%d,%d), pos(%d,%d) and skip={%d,%d}, format=%s, type=%s, level=%d(base=%d, max=%d), mipmap={need=%d, auto=%d}, texture=%u, data=%p(vao=%p)\n", PrintEnum(target), glstate->texture.unpack_row_length, width, height, xoffset, yoffset, glstate->texture.unpack_skip_pixels, glstate->texture.unpack_skip_rows, PrintEnum(format), PrintEnum(type), level, glstate->texture.bound[glstate->texture.active][itarget]->base_level, glstate->texture.bound[glstate->texture.active][itarget]->max_level, glstate->texture.bound[glstate->texture.active][itarget]->mipmap_need, glstate->texture.bound[glstate->texture.active][itarget]->mipmap_auto, glstate->texture.bound[glstate->texture.active][itarget]->texture, data, glstate->vao->unpack);)
     if (width==0 || height==0) {
         return;
     }
-    
+
     gltexture_t *bound = glstate->texture.bound[glstate->texture.active][itarget];
     if (globals4es.automipmap) {
         if (level>0)
             if ((globals4es.automipmap==1) || (globals4es.automipmap==3) || bound->mipmap_need) {
-                return;            // has been handled by auto_mipmap
+                return;			// has been handled by auto_mipmap
             }
             else
                 bound->mipmap_need = 1;
@@ -1597,7 +1716,7 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
             dst += dstWidth;
         }
     }
-    
+
     GLvoid *old = pixels;
 #ifdef TEXSTREAM
     if (globals4es.texstream && (bound->streamed)) {
@@ -1611,7 +1730,7 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
         }
         format = GL_RGB;
         type = GL_UNSIGNED_SHORT_5_6_5;
-    } else  
+    } else
 #endif
     {
         if (!pixel_convert(old, &pixels, width, height, format, type, bound->inter_format, bound->inter_type, 0, glstate->texture.unpack_align)) {
@@ -1631,7 +1750,7 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
                 type = bound->type;
             }
         }
-        
+
     }
     if (old != pixels && old != datab)
         free(old);
@@ -1693,15 +1812,18 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
         } else
             callgeneratemipmap = 1;
     }
-    
+
     if (globals4es.texstream && bound->streamed) {
-/*    // copy the texture to the buffer
+/*	// copy the texture to the buffer
     void* tmp = GetStreamingBuffer(bound->streamingID);
     for (int yy=0; yy<height; yy++) {
         memcpy(tmp+((yy+yoffset)*bound->width+xoffset)*2, pixels+(yy*width)*2, width*2);
     }*/
     } else {
         errorGL();
+        DBG(printf("gles_glTexSubImage2D(%d, %d, %d, %d, %d, %d, %s, %s, 0x%x)\n",
+                   rtarget, level, xoffset, yoffset, width, height, PrintEnum(format),
+                   PrintEnum(type), pixels);)
         gles_glTexSubImage2D(rtarget, level, xoffset, yoffset,
                      width, height, format, type, pixels);
         DBG(CheckGLError(1);)
@@ -1775,7 +1897,7 @@ void APIENTRY_GL4ES gl4es_glTexSubImage2D(GLenum target, GLint level, GLint xoff
 }
 
 // 1d stubs
-void APIENTRY_GL4ES gl4es_glTexImage1D(GLenum target, GLint level, GLint internalFormat,
+void gl4es_glTexImage1D(GLenum target, GLint level, GLint internalFormat,
                   GLsizei width, GLint border,
                   GLenum format, GLenum type, const GLvoid *data) {
 
@@ -1783,7 +1905,7 @@ void APIENTRY_GL4ES gl4es_glTexImage1D(GLenum target, GLint level, GLint interna
     gl4es_glTexImage2D(GL_TEXTURE_1D, level, internalFormat, width, 1,
                  border, format, type, data);
 }
-void APIENTRY_GL4ES gl4es_glTexSubImage1D(GLenum target, GLint level, GLint xoffset,
+void gl4es_glTexSubImage1D(GLenum target, GLint level, GLint xoffset,
                      GLsizei width, GLenum format, GLenum type,
                      const GLvoid *data) {
 
@@ -1791,56 +1913,56 @@ void APIENTRY_GL4ES gl4es_glTexSubImage1D(GLenum target, GLint level, GLint xoff
                     width, 1, format, type, data);
 }
 
-GLboolean APIENTRY_GL4ES gl4es_glIsTexture(GLuint texture) {
-    DBG(printf("glIsTexture(%d):", texture);)
-    if(!glstate) {DBG(printf("GL_FALSE\n");) return GL_FALSE;}
+GLboolean gl4es_glIsTexture(GLuint texture) {
+    DBG(SHUT_LOGD("glIsTexture(%d):", texture);)
+    if(!glstate) {DBG(SHUT_LOGD("GL_FALSE\n");) return GL_FALSE;}
     noerrorShim();
     if (!texture) {
-        DBG(printf("%s\n", glstate->texture.zero->valid?"GL_TRUE":"GL_FALSE");)
+        DBG(SHUT_LOGD("%s\n", glstate->texture.zero->valid?"GL_TRUE":"GL_FALSE");)
         return glstate->texture.zero->valid;
     }
+    int ret;
     khint_t k;
     khash_t(tex) *list = glstate->texture.list;
     if (! list) {
-        DBG(printf("GL_FALSE\n");)
+        DBG(SHUT_LOGD("GL_FALSE\n");)
         return GL_FALSE;
     }
     k = kh_get(tex, list, texture);
     gltexture_t *tex = NULL;
     if (k == kh_end(list)) {
-        DBG(printf("GL_FALSE\n");)
+        DBG(SHUT_LOGD("GL_FALSE\n");)
         return GL_FALSE;
     }
-    DBG(printf("GL_TRUE\n");)
+    DBG(SHUT_LOGD("GL_TRUE\n");)
     return GL_TRUE;
 }
 
-void APIENTRY_GL4ES gl4es_glTexStorage1D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width)
+void gl4es_glTexStorage1D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width)
 {
-    DBG(printf("glTexStorage1D(%s, %d, %s, %d)\n", PrintEnum(target), levels, PrintEnum(internalformat), width);)
+    DBG(SHUT_LOGD("glTexStorage1D(%s, %d, %s, %d)\n", PrintEnum(target), levels, PrintEnum(internalformat), width);)
     gl4es_glTexImage1D(target, 0, internalformat, width, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 }
-void APIENTRY_GL4ES gl4es_glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
+void gl4es_glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
 {
     // (could be implemented in GLES3.0)
-    DBG(printf("glTexStorage2D(%s, %d, %s, %d, %d)\n", PrintEnum(target), levels, PrintEnum(internalformat), width, height);)
+    DBG(SHUT_LOGD("glTexStorage2D(%s, %d, %s, %d, %d)\n", PrintEnum(target), levels, PrintEnum(internalformat), width, height);)
     if(!levels) {
         noerrorShim();
         return;
     }
-    if((internalformat==GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat==GL_COMPRESSED_SRGB_S3TC_DXT1_EXT) 
+    if((internalformat==GL_COMPRESSED_RGB_S3TC_DXT1_EXT || internalformat==GL_COMPRESSED_SRGB_S3TC_DXT1_EXT)
      && !globals4es.avoid16bits)
         gl4es_glTexImage2D(target, 0, internalformat, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
-    else if(((internalformat==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT)) 
+    else if(((internalformat==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT))
      && !globals4es.avoid16bits)
         gl4es_glTexImage2D(target, 0, internalformat, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, NULL);
-    else if((internalformat==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 
-          || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT) 
+    else if((internalformat==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT || internalformat==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+          || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT || internalformat==GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT)
      && !globals4es.avoid16bits)
         gl4es_glTexImage2D(target, 0, internalformat, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, NULL);
     else
         gl4es_glTexImage2D(target, 0, internalformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
 
     int mlevel = maxlevel(width, height);
     gltexture_t *bound = gl4es_getCurrentTexture(target);
